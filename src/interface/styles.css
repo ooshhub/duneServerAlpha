@@ -45,3 +45,19 @@ h1, h2, h3, h4, h5, h6 {
 	box-shadow: 0px 0px 3px #4366d8;
 	text-shadow: 0px 0px 2px #b7c5f1;
 }
+
+#server-log {
+	background-color: black;
+	min-height: 20rem;
+	max-height: 20rem;
+	width: 97%;
+	margin: 1rem auto;
+	color: yellow;
+	border: 2px rgb(53, 52, 52) solid;
+	overflow-y: scroll;
+}
+
+.server-log-line {
+	text-align: left;
+	padding: 0.25rem 0.5rem;
+}

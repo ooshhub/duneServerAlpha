@@ -5,11 +5,10 @@
 	"include": [
 		"./src/server/**/*",
 	],
-	"exclude": ["./src/server/tsBuild/**/*"],
 	"compilerOptions": {
 		"typeRoots": [ "./src/@types", ],
 		"rootDir": "./src/server",
-		"outDir": "./src/server/tsBuild",
+		"outDir": "./build/ts",
 		"target": "ES2022",
 		"module": "ES2022",
 		"moduleResolution": "node",

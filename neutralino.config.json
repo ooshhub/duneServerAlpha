@@ -33,7 +33,7 @@
     "window": {
       "title": "duneServerAlpha",
       "width": 1000,
-      "height": 600,
+      "height": 900,
       "minWidth": 400,
       "minHeight": 200,
       "fullScreen": false,
