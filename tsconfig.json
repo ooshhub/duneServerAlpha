@@ -1,0 +1,21 @@
+{
+	"files": [
+		"./src/server/main.ts",
+	],
+	"include": [
+		"./src/server/**/*",
+	],
+	"exclude": ["./src/server/tsBuild/**/*"],
+	"compilerOptions": {
+		"typeRoots": [ "./src/@types", ],
+		"rootDir": "./src/server",
+		"outDir": "./src/server/tsBuild",
+		"target": "ES2022",
+		"module": "ES2022",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node"],
+		"strict": true,
+	},
+}

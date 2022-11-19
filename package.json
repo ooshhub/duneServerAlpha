@@ -1,0 +1,30 @@
+{
+  "name": "duneserveralpha",
+  "description": "Gugugugugugug :peter:",
+  "version": "0.1.0",
+  "main": "main.ts",
+	"type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+		"servertest": "node ./src/server/tsBuild/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ooshhub/duneServerAlpha.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ooshhub/duneServerAlpha/issues"
+  },
+  "homepage": "https://github.com/ooshhub/duneServerAlpha#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "@typescript-eslint/parser": "^5.43.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.3",
+		"@types/node": "^18.11.9"
+  },
+  "dependencies": {
+  }
+}
