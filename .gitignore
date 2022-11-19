@@ -4,6 +4,11 @@
 # Neutralinojs binaries and builds
 /bin
 /dist
+/node_modules
+/node_modules/**/*
+/build
+/.tmp
+
 
 # Neutralinojs client (minified)
 neutralino.js
