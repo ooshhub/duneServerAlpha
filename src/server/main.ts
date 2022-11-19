@@ -11,11 +11,11 @@ enum LogStates {
 }
 
 enum LogTypes {
-	WARN 	= 'WARNING',
-	ERROR = 'ERROR  ',
-	LOG		= 'LOG    ',
-	INFO	= 'INFO   ',
-	DEBUG	= 'DEBUG  '
+	WARN 	= 'WARN ',
+	ERROR = 'ERROR',
+	LOG		= 'LOG  ',
+	INFO	= 'INFO ',
+	DEBUG	= 'DEBUG'
 }
 
 class Logger {
@@ -98,16 +98,6 @@ class Logger {
 		}
 		await logger.log(message);
 	});
-
-	// const listenStdIn = () => {
-	// 	process.stdin
-	// 		.on('data', data => {
-	// 			//do things
-	// 		})
-	// 		.on('end', () => {
-	// 			// do more things
-	// 		});
-	// }
 
 	await logger.warn('Fucking shit eh');
 
