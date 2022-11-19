@@ -38,13 +38,13 @@
       "minHeight": 200,
       "fullScreen": false,
       "alwaysOnTop": false,
-      "icon": "./src/interface/icons/appIcon.png",
+      "icon": "/src/interface/icons/appIcon.png",
       "enableInspector": true,
       "borderless": false,
       "maximize": false,
       "hidden": false,
-      "resizable": true,
-      "exitProcessOnClose": false
+      "resizable": false,
+      "exitProcessOnClose": true
     },
     "browser": {
       "globalVariables": {

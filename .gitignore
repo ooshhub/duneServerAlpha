@@ -9,7 +9,7 @@ tsconfig.json
 /build
 /package
 /.tmp
-
+.eslint*.*
 
 # Neutralinojs client (minified)
 neutralino.js

@@ -1,26 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <title>NeutralinoJs sample app</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Dune Test Server Interface</title>
+		<script src="js/neutralino.js"></script>
+    <script defer src="js/main.js"></script>
   </head>
   <body>
-    <div id="neutralinoapp">
-      <h1>NeutralinoJs</h1>
-      <div id="info"></div>
-      <br/>
-      <div>
-        <a href="#" onclick="openDocs();">Docs</a> &middot;  
-        <a href="#" onclick="openTutorial();">Tutorial</a>
+    <div id="dune-server-interface">
+      <div class="container">
+        <h2>Dune Server Alpha</h2>
+        <h3>Dev Interface</h3>
+      </div>
+      <div class="container">
+        <button id="start-server" class="menu-button">Start Server</button>
       </div>
     </div>
-    <!-- Neutralino.js client. This file is gitignored, 
-        because `neu update` typically downloads it.
-        Avoid copy-pasting it. 
-        -->
-    <script src="js/neutralino.js"></script>
-    <!-- Your app's source files -->
-    <script src="js/main.js"></script>
   </body>
 </html>

@@ -1,23 +1,4 @@
-// This is just a sample app. You can structure your Neutralinojs app code as you wish.
-// This example app is written with vanilla JavaScript and HTML.
-// Feel free to use any frontend framework you like :)
-// See more details: https://neutralino.js.org/docs/how-to/use-a-frontend-library
-
-function showInfo() {
-    document.getElementById('info').innerHTML = `
-        ${NL_APPID} is running on port ${NL_PORT}  inside ${NL_OS}
-        <br/><br/>
-        <span>server: v${NL_VERSION} . client: v${NL_CVERSION}</span>
-        `;
-}
-
-function openDocs() {
-    Neutralino.os.open("https://neutralino.js.org/docs");
-}
-
-function openTutorial() {
-    Neutralino.os.open("https://www.youtube.com/watch?v=txDlNNsgSh8&list=PLvTbqpiPhQRb2xNQlwMs0uVV0IN8N-pKj");
-}
+/* globals NL_MODE, Neutralino, NL_VERSION, NL_CVERSION, NL_OS */
 
 function setTray() {
     if(NL_MODE != "window") {
@@ -25,7 +6,7 @@ function setTray() {
         return;
     }
     let tray = {
-        icon: "/resources/icons/trayIcon.png",
+        icon: "/src/interface/icons/trayIcon.png",
         menuItems: [
             {id: "VERSION", text: "Get version"},
             {id: "SEP", text: "-"},
@@ -60,4 +41,24 @@ if(NL_OS != "Darwin") { // TODO: Fix https://github.com/neutralinojs/neutralinoj
     setTray();
 }
 
-showInfo();
+const timeout = async (ms) => new Promise(res => setTimeout(() => res(), ms));
+
+document.querySelector('#start-server')?.addEventListener('click', async () => {
+  const spawn = await Neutralino.os.spawnProcess('node ./src/server/tsBuild/main.js');
+
+  Neutralino.events.on('spawnedProcess', (event) => {
+    console.log(event);
+    // if (spawn.id === event.detail.id) {
+  });
+
+  console.log(spawn.id, spawn.pid);
+
+  await timeout(2500);
+
+  await Neutralino.os.updateSpawnedProcess(spawn.id, 'stdIn', 'flaps\n');
+
+  await timeout(2500);
+
+  await Neutralino.os.updateSpawnedProcess(spawn.id, 'stdIn', 'ping');
+
+});

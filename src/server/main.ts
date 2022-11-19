@@ -10,6 +10,14 @@ enum LogStates {
 	ERROR = 'error',
 }
 
+enum LogTypes {
+	WARN 	= 'WARNING',
+	ERROR = 'ERROR  ',
+	LOG		= 'LOG    ',
+	INFO	= 'INFO   ',
+	DEBUG	= 'DEBUG  '
+}
+
 class Logger {
 
 	#log: FileHandle|null = null;
@@ -41,7 +49,7 @@ class Logger {
 		this.#logState = LogStates.IDLE;
 	}
 
-	async #writeLog(msg: string, logType: string): Promise<void> {
+	async #writeLog(msg: string, logType: LogTypes): Promise<void> {
 		if ([ LogStates.ERROR, LogStates.INIT ].includes(this.#logState)) throw new Error('FUCK');
 		const timestamp = new Date(Date.now()).toLocaleString(),
 			message = `[${timestamp}] ${this.name}.${logType} - ${msg}\n`;
@@ -58,13 +66,13 @@ class Logger {
 		await this.#findOrCreateLogFile();
 	}
 
-	async log(msg: string): Promise<void> {	this.#writeLog(msg, 'LOG'); }
-	async warn(msg: string): Promise<void> {	this.#writeLog(msg, 'WARNING'); }
-	async info(msg: string): Promise<void> {	this.#writeLog(msg, 'INFO'); }
-	async error(msg: string): Promise<void> {	this.#writeLog(msg, 'ERROR'); }
+	async log(msg: string): Promise<void> {	this.#writeLog(msg, LogTypes.LOG); }
+	async warn(msg: string): Promise<void> {	this.#writeLog(msg, LogTypes.WARN); }
+	async info(msg: string): Promise<void> {	this.#writeLog(msg, LogTypes.INFO); }
+	async error(msg: string): Promise<void> {	this.#writeLog(msg, LogTypes.ERROR); }
 	async debug(msg: string): Promise<void> {
 		if (!this.#debug) return;
-		this.#writeLog(msg, 'DEBUG');
+		this.#writeLog(msg, LogTypes.DEBUG);
 	}
 
 }
@@ -83,8 +91,12 @@ class Logger {
 		input: stdin,
 		output: stdout,
 	});
-	stdInReader.on('line', (message) => {
-		logger.log(message);
+	stdInReader.on('line', async (message) => {
+		console.log(`"${message}"`);
+		if (/ping/.test(message)) {
+			process.stdout.write('fugoffcunt');
+		}
+		await logger.log(message);
 	});
 
 	// const listenStdIn = () => {

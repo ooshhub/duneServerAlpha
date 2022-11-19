@@ -18,13 +18,11 @@ class Logger {
         this.name = loggerName;
     }
     async #findOrCreateLogFile(filename = 'cunt.log') {
-        console.log('as;diugsd;ifugb;sidfhg;sdoifg;ofg;ohs');
         if (this.#log)
             throw new Error(`Log has already been initialised`);
         this.#log = await open(`./${filename}`, 'a+')
             .catch(err => { throw err; });
         this.#logState = LogStates.IDLE;
-        console.log(this.#logState);
     }
     async #processQueue() {
         if (!this.#log || this.#logState === LogStates.ERROR)
@@ -32,18 +30,15 @@ class Logger {
         this.#logState = LogStates.BUSY;
         while (this.#logQueue.length > 0) {
             const msg = this.#logQueue.shift();
-            console.log(msg);
             if (msg)
                 await this.#log.write(msg);
         }
         this.#logState = LogStates.IDLE;
     }
     async #writeLog(msg, logType) {
-        console.log(this.#logState);
         if ([LogStates.ERROR, LogStates.INIT].includes(this.#logState))
             throw new Error('FUCK');
         const timestamp = new Date(Date.now()).toLocaleString(), message = `[${timestamp}] ${this.name}.${logType} - ${msg}\n`;
-        console.log(message);
         this.#logQueue.push(message);
         if (this.#logState === LogStates.IDLE)
             this.#processQueue();
@@ -76,8 +71,12 @@ class Logger {
         input: stdin,
         output: stdout,
     });
-    stdInReader.on('line', (message) => {
-        logger.log(message);
+    stdInReader.on('line', async (message) => {
+        console.log(`"${message}"`);
+        if (/ping/.test(message)) {
+            process.stdout.write('fugoffcunt');
+        }
+        await logger.log(message);
     });
     // const listenStdIn = () => {
     // 	process.stdin
