@@ -1,8 +1,8 @@
 /* globals NL_MODE, Neutralino, NL_VERSION, NL_CVERSION, NL_OS */
 
 import { ServerLog } from './ServerLog.js';
-
-const { Pue } = await import('./pue.js');
+import { ServerInterface } from './ServerInterface.js';
+import { Helpers } from './Helpers.js';
 
 /**
  * Constant land
@@ -13,12 +13,13 @@ const SERVER_BUILD 			= `./build/ts/main.js`,
 	SERVER_LOG_SELECTOR		= '#server-log';
 
 
-const serverLog = new ServerLog(document.querySelector(SERVER_LOG_SELECTOR), SERVER_STATUS_MARK);
+const serverLog = new ServerLog(document.querySelector(SERVER_LOG_SELECTOR), SERVER_STATUS_MARK),
+  serverInterface = new ServerInterface('serverInterface', SERVER_BUILD);
 
 /**
  * Neutralino startup
  */
-const neutralinoApp = (async () => {
+(async () => {
 
 	const initNeutralino = () => {
 		Neutralino.init();
@@ -61,116 +62,11 @@ const neutralinoApp = (async () => {
 })();
 
 /**
- * Server functions
+ * Initialise HTML handlers
  */
-const serverFunctions = (() => {
-
-	const server = { };
-
-	const spawnServer = async () => {
-		const existingProcesses = await Neutralino.os.getSpawnedProcesses();
-		if (existingProcesses.length) {
-			console.log(`Killing ${existingProcesses.length} current processes...`);
-			await destroyAllServers();
-			console.info(`Removed processes, server is: `, server);
-		}
-		Object.assign(server, await Neutralino.os.spawnProcess(`node ${SERVER_BUILD}`));
-		console.info(server);
-	}
-	const startServerListeners = (() => {
-		Neutralino.events.on('spawnedProcess', (event) => {
-			if (server.id === event.detail.id) {
-				switch(event.detail.action) {
-					case 'stdOut': {
-						handleServerOut(event);
-						break;
-					}
-					case 'stdErr': {
-						handleServerErr(event);
-						break;
-					}
-					case 'exit': {
-						handleServerExit(event);
-						break
-					}
-					default: {
-						console.warn(`Unknown server event`, event);
-					}
-				}
-			}
-		});
-	})();
-	
-	const handleServerExit = async () => {
-		destroyAllServers();
-		serverLog.receivedStdOut(`Server was destroyed. You monster.`);
-	}
-
-	const handleServerOut = (event) => {
-		const msg = event.detail.data;
-		serverLog.receivedStdOut(msg);
-	}
-	const handleServerErr = (event) => {
-		console.info(event);
-	}
-
-	const destroyAllServers = async (id) => {
-		const ids = id
-			? [ id ]
-			: Object.values(await Neutralino.os.getSpawnedProcesses()).map(v => v.id);
-		console.log(ids);
-		for (let i = 0; i < ids.length; i++) {
-			await Neutralino.os.updateSpawnedProcess(ids[i], 'exit');
-		}
-		Object.assign(server, { id: null, pid: null });
-	}
-
-	const commandsEnum = {
-		ping: `%PING%`,
-		log:	`%LOG%`,
-		echo: `%ECHO%`,
-	}
-	const sendMessageToServer = async (message, command) => {
-		const commandString = command && commandsEnum[command] ? commandsEnum[command] : '';
-		let updated = true;
-		await Neutralino.os.updateSpawnedProcess(server.id, 'stdIn', `${commandString}${message}\n`)
-			.catch(err => {
-				updated = false;
-				console.warn(err);
-			});
-		return updated;
-	}
-
-	const handleStartServerClick = () => {
-		spawnServer();
-	}
-
-	const echoServer = () => {
-		const echoInput = document.querySelector('#echo-text').value;
-		if (echoInput) serverFunctions.sendMessageToServer(echoInput, 'echo');
-	}
-
-	return { handleStartServerClick, sendMessageToServer, destroyAllServers, echoServer }
-
-})();
-
-
-
-const initHtmlHandlers = (async () => {
-	document.querySelector('#start-server')?.addEventListener('click', serverFunctions.handleStartServerClick);
-	document.querySelector('#kill-server')?.addEventListener('click', () => serverFunctions.destroyAllServers());
-	document.querySelector('#echo-server')?.addEventListener('click', serverFunctions.echoServer);
+(async () => {
+	document.querySelector('#start-server')?.addEventListener('click', serverInterface.handleStartServerClick);
+	document.querySelector('#kill-server')?.addEventListener('click', () => serverInterface.destroyAllServers());
+	document.querySelector('#echo-server')?.addEventListener('click', serverInterface.echoServer);
 	document.querySelector('#version').innerText = `v${INTERFACE_VERSION}`;
 })();
-
-const pingPong = async () => {
-	await Helpers.timeout(8000);
-	serverFunctions.sendMessageToServer('cunt', 'ping');
-};
-
-class Helpers {
-
-	static async timeout(ms) {
-		return new Promise(res => setTimeout(() => res(), ms));
-	}
-}
