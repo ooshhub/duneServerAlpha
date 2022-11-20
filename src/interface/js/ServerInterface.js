@@ -9,11 +9,12 @@ export const COMMANDS = {
 export class ServerInterface {
 
   #server = {};
+  #logger = null;
 
   #serverPath = '';
 
-  constructor(name, serverFIlePath) {
-    this.name = name;
+  constructor(serverLogger, serverFIlePath) {
+    this.#logger = serverLogger;
     this.#serverPath = serverFIlePath;
   }
 
@@ -21,7 +22,7 @@ export class ServerInterface {
     const existingProcesses = await Neutralino.os.getSpawnedProcesses();
     if (existingProcesses.length) {
       console.log(`Killing ${existingProcesses.length} current processes...`);
-      await this.#destroyAllthis.#servers();
+      await this.destroyAllServers();
       console.info(`Removed processes, server is: `, this.#server);
     }
     Object.assign(this.#server, await Neutralino.os.spawnProcess(`node ${this.#serverPath}`));
@@ -34,15 +35,15 @@ export class ServerInterface {
       if (this.#server.id === event.detail.id) {
         switch(event.detail.action) {
           case 'stdOut': {
-            this.#serverOut(event);
+            this.#handleServerOut(event);
             break;
           }
           case 'stdErr': {
-            this.#serverErr(event);
+            this.#handleServerErr(event);
             break;
           }
           case 'exit': {
-            this.#serverExit(event);
+            this.#handleServerExit(event);
             break
           }
           default: {
@@ -54,13 +55,13 @@ export class ServerInterface {
   }
     
   async #handleServerExit() {
-    this.#destroyAllServers();
-    this.#serverLog.receivedStdOut(`Server was destroyed. You monster.`);
+    this.destroyAllServers();
+    this.#logger.receivedStdOut(`Server was destroyed. You monster.`);
   }
   
-  async #handletServerOut(event) {
+  async #handleServerOut(event) {
     const msg = event.detail.data;
-    this.#serverLog.receivedStdOut(msg);
+    this.#logger.receivedStdOut(msg);
   }
   async #handleServerErr(event) {
     console.info(event);
@@ -89,12 +90,12 @@ export class ServerInterface {
   }
 
   handleStartServerClick = () => {
-    this.#spawnthis.#server();
+    this.#spawnServer();
   }
 
   echoServer = () => {
     const echoInput = document.querySelector('#echo-text').value;
-    if (echoInput) this.#serverFunctions.sendMessageTothis.#server(echoInput, 'echo');
+    if (echoInput) this.sendMessageToServer(echoInput, 'echo');
   }
 
 }

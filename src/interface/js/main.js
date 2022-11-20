@@ -10,11 +10,11 @@ import { Helpers } from './Helpers.js';
 const SERVER_BUILD 			= `./build/ts/main.js`,
 	INTERFACE_VERSION     = `0.1.0`,
 	SERVER_STATUS_MARK		= `%STATUS%`,
-	SERVER_LOG_SELECTOR		= '#server-log';
+	SERVER_LOG_SELECTOR		= '#log-content';
 
 
 const serverLog = new ServerLog(document.querySelector(SERVER_LOG_SELECTOR), SERVER_STATUS_MARK),
-  serverInterface = new ServerInterface('serverInterface', SERVER_BUILD);
+  serverInterface = new ServerInterface(serverLog, SERVER_BUILD);
 
 /**
  * Neutralino startup
