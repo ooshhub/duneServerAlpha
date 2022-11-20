@@ -76,9 +76,8 @@ const serverFunctions = (() => {
 		}
 		Object.assign(server, await Neutralino.os.spawnProcess(`node ${SERVER_BUILD}`));
 		console.info(server);
-		startServerListeners();
 	}
-	const startServerListeners = () => {
+	const startServerListeners = (() => {
 		Neutralino.events.on('spawnedProcess', (event) => {
 			if (server.id === event.detail.id) {
 				switch(event.detail.action) {
@@ -100,8 +99,7 @@ const serverFunctions = (() => {
 				}
 			}
 		});
-		pingPong();
-	}
+	})();
 	
 	const handleServerExit = async () => {
 		destroyAllServers();
@@ -117,10 +115,14 @@ const serverFunctions = (() => {
 	}
 
 	const destroyAllServers = async (id) => {
-		const activeProcesses = await Neutralino.os.getSpawnedProcesses();
-		for (let i = 0; i < activeProcesses.length; i++) {
-			await Neutralino.os.updateSpawnedProcess(id, 'exit');
+		const ids = id
+			? [ id ]
+			: Object.values(await Neutralino.os.getSpawnedProcesses()).map(v => v.id);
+		console.log(ids);
+		for (let i = 0; i < ids.length; i++) {
+			await Neutralino.os.updateSpawnedProcess(ids[i], 'exit');
 		}
+		Object.assign(server, { id: null, pid: null });
 	}
 
 	const commandsEnum = {
@@ -143,8 +145,9 @@ const serverFunctions = (() => {
 		spawnServer();
 	}
 
-	const echoServer = (string) => {
-		serverFunctions.sendMessageToServer('fuckuuuuu', 'echo');
+	const echoServer = () => {
+		const echoInput = document.querySelector('#echo-text').value;
+		if (echoInput) serverFunctions.sendMessageToServer(echoInput, 'echo');
 	}
 
 	return { handleStartServerClick, sendMessageToServer, destroyAllServers, echoServer }
@@ -155,8 +158,9 @@ const serverFunctions = (() => {
 
 const initHtmlHandlers = (async () => {
 	document.querySelector('#start-server')?.addEventListener('click', serverFunctions.handleStartServerClick);
-	document.querySelector('#kill-server')?.addEventListener('click', serverFunctions.destroyAllServers);
+	document.querySelector('#kill-server')?.addEventListener('click', () => serverFunctions.destroyAllServers());
 	document.querySelector('#echo-server')?.addEventListener('click', serverFunctions.echoServer);
+	document.querySelector('#version').innerText = `v${INTERFACE_VERSION}`;
 })();
 
 const pingPong = async () => {
