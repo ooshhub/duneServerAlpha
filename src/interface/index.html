@@ -7,18 +7,26 @@
     <link rel="stylesheet" href="styles.css" />
     <title>Dune Test Server Interface</title>
 		<script src="js/neutralino.js"></script>
-    <script defer src="js/main.js"></script>
+    <script defer src="js/main.js" type="module"></script>
   </head>
   <body>
     <div id="dune-server-interface">
       <div class="container">
         <h2>Dune Server Alpha</h2>
-        <h3>Dev Interface</h3>
+        <h3>Dev Interface <span id="version"></span></h3>
       </div>
-      <div class="container">
-				<input id="server-port" class="menu=-input" placeholder="port" />
-        <button id="start-server" class="menu-button">Start Server</button>
-				<button id="kill-server" class="menu-button">Kill Server</button>
+      <div id="controls" class="container">
+				<div class="control">
+					<button id="start-server" class="menu-button">Start Server</button>
+					<input id="server-port" class="menu-input" placeholder="port" />
+				</div>
+				<div class="control">
+					<button id="kill-server" class="menu-button">Kill Server</button>
+				</div>
+				<div class="control">
+					<button id="echo-server" class="menu-button">Echo Server</button>
+					<input id="echo-text" class="menu-input" placeholder="...text" />
+				</div>
       </div>
 			<div class="container">
 				<h3>Server status</h3>

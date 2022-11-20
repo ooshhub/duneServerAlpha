@@ -1,11 +1,19 @@
 /* globals NL_MODE, Neutralino, NL_VERSION, NL_CVERSION, NL_OS */
 
+import { ServerLog } from './ServerLog.js';
+
+const { Pue } = await import('./pue.js');
 
 /**
  * Constant land
  */
 const SERVER_BUILD 			= `./build/ts/main.js`,
-	INTERFACE_VERSION = `0.1.0`;
+	INTERFACE_VERSION     = `0.1.0`,
+	SERVER_STATUS_MARK		= `%STATUS%`,
+	SERVER_LOG_SELECTOR		= '#server-log';
+
+
+const serverLog = new ServerLog(document.querySelector(SERVER_LOG_SELECTOR), SERVER_STATUS_MARK);
 
 /**
  * Neutralino startup
@@ -63,11 +71,11 @@ const serverFunctions = (() => {
 		const existingProcesses = await Neutralino.os.getSpawnedProcesses();
 		if (existingProcesses.length) {
 			console.log(`Killing ${existingProcesses.length} current processes...`);
-			for (let i = 0; i < existingProcesses.length; i++) {
-				await Neutralino.os.updateSpawnedProcess(existingProcesses[i].id, 'exit');
-			}
+			await destroyAllServers();
+			console.info(`Removed processes, server is: `, server);
 		}
 		Object.assign(server, await Neutralino.os.spawnProcess(`node ${SERVER_BUILD}`));
+		console.info(server);
 		startServerListeners();
 	}
 	const startServerListeners = () => {
@@ -92,26 +100,38 @@ const serverFunctions = (() => {
 				}
 			}
 		});
+		pingPong();
 	}
-	const handleServerExit = (event) => {
-		console.info(event);
+	
+	const handleServerExit = async () => {
+		destroyAllServers();
+		serverLog.receivedStdOut(`Server was destroyed. You monster.`);
 	}
+
 	const handleServerOut = (event) => {
 		const msg = event.detail.data;
-		serverConsole.buildLine(msg);
+		serverLog.receivedStdOut(msg);
 	}
 	const handleServerErr = (event) => {
 		console.info(event);
 	}
 
+	const destroyAllServers = async (id) => {
+		const activeProcesses = await Neutralino.os.getSpawnedProcesses();
+		for (let i = 0; i < activeProcesses.length; i++) {
+			await Neutralino.os.updateSpawnedProcess(id, 'exit');
+		}
+	}
+
 	const commandsEnum = {
 		ping: `%PING%`,
 		log:	`%LOG%`,
+		echo: `%ECHO%`,
 	}
-	const sendMessageToServer = async (message, isCommand = false) => {
-		message = isCommand ? (commandsEnum[message] ?? message) : message;
+	const sendMessageToServer = async (message, command) => {
+		const commandString = command && commandsEnum[command] ? commandsEnum[command] : '';
 		let updated = true;
-		await Neutralino.os.updateSpawnedProcess(server.id, 'stdIn', message)
+		await Neutralino.os.updateSpawnedProcess(server.id, 'stdIn', `${commandString}${message}\n`)
 			.catch(err => {
 				updated = false;
 				console.warn(err);
@@ -123,38 +143,30 @@ const serverFunctions = (() => {
 		spawnServer();
 	}
 
-	return { handleStartServerClick, sendMessageToServer }
-
-})();
-
-const serverConsole = (() => {
-
-	const serverConsoleSelector = '#server-log',
-		serverConsoleElement = document.querySelector(serverConsoleSelector);
-
-	const buildLine = (message) => {
-		const newLine = document.createElement('div');
-		newLine.classList.add(`server-log-line`);
-		newLine.innerText = message;
-		serverConsoleElement.append(newLine);
-		const scrollDistance = serverConsoleElement.scrollHeight - (serverConsoleElement.scrollTop + serverConsoleElement.offsetHeight);
-		if (scrollDistance < 150) {
-			serverConsoleElement.scrollTop = serverConsoleElement.scrollHeight;
-		}
+	const echoServer = (string) => {
+		serverFunctions.sendMessageToServer('fuckuuuuu', 'echo');
 	}
 
-	return { buildLine }
+	return { handleStartServerClick, sendMessageToServer, destroyAllServers, echoServer }
 
 })();
+
+
 
 const initHtmlHandlers = (async () => {
 	document.querySelector('#start-server')?.addEventListener('click', serverFunctions.handleStartServerClick);
+	document.querySelector('#kill-server')?.addEventListener('click', serverFunctions.destroyAllServers);
+	document.querySelector('#echo-server')?.addEventListener('click', serverFunctions.echoServer);
 })();
+
+const pingPong = async () => {
+	await Helpers.timeout(8000);
+	serverFunctions.sendMessageToServer('cunt', 'ping');
+};
 
 class Helpers {
 
 	static async timeout(ms) {
 		return new Promise(res => setTimeout(() => res(), ms));
 	}
-
 }

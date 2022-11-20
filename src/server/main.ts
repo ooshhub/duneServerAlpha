@@ -77,10 +77,35 @@ class Logger {
 
 }
 
-(async () => {
+const serverCommands = (() => {
+
+	const STATUS_MARKER = `%STATUS%`;
+
+	const echo = (inputString: string) => {
+		const output = inputString.replace(/^%\w+%/, '');
+		process.stdout.write(`${STATUS_MARKER}${output}`);
+	}
+
+	const pong = () => {
+		process.stdout.write(`${STATUS_MARKER}pong`);
+	}
+
+	return { echo, pong }
+
+})();
+
+
+const mockServer = (async () => {
 
 	const logger = new Logger('CuntyLogger');
 	await logger.init();
+
+	const STATUS_MARKER = `%STATUS%`;
+
+	const COMMANDS: { [key: string]: (message: string) => void } = {
+		"ECHO": serverCommands.echo,
+		'PING': serverCommands.pong,
+	}
 
 	const exitServer = () => {
 		logger?.destroy();
@@ -92,19 +117,27 @@ class Logger {
 		output: stdout,
 	});
 	stdInReader.on('line', async (message) => {
-		console.log(`"${message}"`);
-		if (/ping/.test(message)) {
-			process.stdout.write('fugoffcunt');
+		message = message.trim();
+		const isCommand = message.match(/^%(\w+)%/);
+		if (isCommand) {
+			const command = `${isCommand[1]}`;
+			if (Reflect.has(COMMANDS, command)) {
+				COMMANDS[command](message);
+				return;
+			}
 		}
 		await logger.log(message);
 	});
 
 	await logger.warn('Fucking shit eh');
+	process.stdout.write(`${STATUS_MARKER}Server is online`);
 
-	let x = 0;
-	setInterval(() => {
-		console.log(`...${x}`);
-		x++;
-	}, 10000);
+	// let x = 0;
+	// setInterval(() => {
+	// 	console.log(`...${x}`);
+	// 	x++;
+	// }, 10000);
 	
-})();
+});
+
+await mockServer();
