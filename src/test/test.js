@@ -1,6 +1,36 @@
+class Tester {
 
-const value = `echo stuffdfgj 209582`
+  constructor() {
+    this.name ='stuff';
+    this.prop = { things: 'what' };
+  }
 
-const parts = value.trim().match(/(\/)?(\w+)\s+(.+)/);
+  doStuff() {
+    console.log('blah');
+  }
 
-console.log(parts);
+  destroy(target) {
+    destroyer(target);
+  }
+
+}
+
+const destroyer = async (target) => {
+  console.log(target);
+  target.value = 123;
+  return target;
+}
+
+const test = new Tester();
+
+test.doStuff()
+
+await destroyer({ value: test }).then(resp => {
+  console.log(resp);
+  console.log(test);
+  console.log('sdfgdf');
+})
+
+setTimeout(() => {
+  console.log(test)
+}, 2000);

@@ -1,81 +1,42 @@
-import { open } from "fs/promises";
-import { FileHandle } from "fs/promises";
 import process, { stdin, stdout } from "process";
 import readLine from "readline/promises";
 
-enum LogStates {
-	INIT	= 'init',
-	IDLE 	= 'idle',
-	BUSY 	= 'busy',
-	ERROR = 'error',
-}
+/**
+ * TODO: write interfaces for:
+ *  - player communication
+ *  - lobby functionality
+ *  - data storage
+ *  - ruleset interaction
+ * 
+ * TODO: create event system for server.... localHub should do it?
+ *  - simple event routing to handle player ids / houses etc. and route the traffic to the right place
+ *  - game core only cares about houses
+ * 	- server cares about sockets
+ *  - WhoIs service takes care of translating playerId/houseId/socketId
+ * 
+ * TODO: server functions for the following
+ *  - wrapper function for async request with retries for requesting data from players
+ *  - listener functions for player data requests (e.g. player requests update due to reconnect)
+ *  - player polling, e.g. for opportunities for playing cards at certain points in the game
+ * 
+ */
 
-enum LogTypes {
-	WARN 	= 'WARN ',
-	ERROR = 'ERROR',
-	LOG		= 'LOG  ',
-	INFO	= 'INFO ',
-	DEBUG	= 'DEBUG'
-}
 
-class Logger {
+// Listen to stdin for instructions
+	// TODO: write a stdin interface for server commands
 
-	#log: FileHandle|null = null;
-	#logState:LogStates = LogStates.INIT;
+// Spin up a server when given port number
+	// TODO: rewrite socketserver
 
-	#logQueue:string[] = [];
+// Listen for players joining
 
-	name: string;
-	#debug = true;
+// Player [localhost] is the host.
 
-	constructor(loggerName: string) {
-		this.name = loggerName;
-	}
+// Player host is the source of truth until a lobby in finalised, then the server is boss.
+	// TODO: rewrite lobby functionality
 
-	async #findOrCreateLogFile(filename = 'cunt.log'): Promise<void> {
-		if (this.#log) throw new Error(`Log has already been initialised`);
-		this.#log = await open(`./${filename}`, 'a+')
-			.catch(err => { throw err; });
-		this.#logState = LogStates.IDLE;
-	}
+// Start the game. Play. Win. Coding complete.
 
-	async #processQueue(): Promise<void> {
-		if (!this.#log || this.#logState === LogStates.ERROR) throw new Error(`Log is busted.`);
-		this.#logState = LogStates.BUSY;
-		while (this.#logQueue.length > 0) {
-			const msg = this.#logQueue.shift();
-			if (msg) await this.#log.write(msg);
-		}
-		this.#logState = LogStates.IDLE;
-	}
-
-	async #writeLog(msg: string, logType: LogTypes): Promise<void> {
-		if ([ LogStates.ERROR, LogStates.INIT ].includes(this.#logState)) throw new Error('FUCK');
-		const timestamp = new Date(Date.now()).toLocaleString(),
-			message = `[${timestamp}] ${this.name}.${logType} - ${msg}\n`;
-		this.#logQueue.push(message);
-		if (this.#logState === LogStates.IDLE) this.#processQueue();
-	}
-
-	async destroy(): Promise<void> {
-		await new Promise<void>(res => { setTimeout(() => res(), 10) });
-		await this.#log?.close();
-	}
-
-	async init(): Promise<void> {
-		await this.#findOrCreateLogFile();
-	}
-
-	async log(msg: string): Promise<void> {	this.#writeLog(msg, LogTypes.LOG); }
-	async warn(msg: string): Promise<void> {	this.#writeLog(msg, LogTypes.WARN); }
-	async info(msg: string): Promise<void> {	this.#writeLog(msg, LogTypes.INFO); }
-	async error(msg: string): Promise<void> {	this.#writeLog(msg, LogTypes.ERROR); }
-	async debug(msg: string): Promise<void> {
-		if (!this.#debug) return;
-		this.#writeLog(msg, LogTypes.DEBUG);
-	}
-
-}
 
 const serverCommands = (() => {
 
