@@ -90,14 +90,20 @@ const serverCommands = (() => {
 		process.stdout.write(`${STATUS_MARKER}pong`);
 	}
 
-	return { echo, pong }
+	const log = (message: string) => {
+		message = message.replace(/^\s*%\w+%/, '');
+		logger.log(message);
+	}
+
+	return { echo, pong, log }
 
 })();
+
+const logger = new Logger('CuntyLogger');
 
 
 const mockServer = (async () => {
 
-	const logger = new Logger('CuntyLogger');
 	await logger.init();
 
 	const STATUS_MARKER = `%STATUS%`;
@@ -105,6 +111,7 @@ const mockServer = (async () => {
 	const COMMANDS: { [key: string]: (message: string) => void } = {
 		"ECHO": serverCommands.echo,
 		'PING': serverCommands.pong,
+		'LOG':	serverCommands.log
 	}
 
 	const exitServer = () => {
@@ -126,17 +133,11 @@ const mockServer = (async () => {
 				return;
 			}
 		}
-		await logger.log(message);
+		else process.stdout.write(`Server knows not this command.`);
 	});
 
 	await logger.warn('Fucking shit eh');
 	process.stdout.write(`${STATUS_MARKER}Server is online`);
-
-	// let x = 0;
-	// setInterval(() => {
-	// 	console.log(`...${x}`);
-	// 	x++;
-	// }, 10000);
 	
 });
 

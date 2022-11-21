@@ -2,7 +2,7 @@
 
 import { ServerLog } from './ServerLog.js';
 import { ServerInterface } from './ServerInterface.js';
-import { Helpers } from './Helpers.js';
+import { ServerCommandLineInterface } from './ServerCommandLineInterface.js';
 
 /**
  * Constant land
@@ -10,11 +10,13 @@ import { Helpers } from './Helpers.js';
 const SERVER_BUILD 			= `./build/ts/main.js`,
 	INTERFACE_VERSION     = `0.1.0`,
 	SERVER_STATUS_MARK		= `%STATUS%`,
-	SERVER_LOG_SELECTOR		= '#log-content';
+	SERVER_LOG_SELECTOR		= '#log-content',
+	SERVER_CLI_ELEMENT		= `#log-text-input`;
 
 
 const serverLog = new ServerLog(document.querySelector(SERVER_LOG_SELECTOR), SERVER_STATUS_MARK),
-  serverInterface = new ServerInterface(serverLog, SERVER_BUILD);
+	serverInterface = new ServerInterface(serverLog, SERVER_BUILD),
+	serverCommandLine = new ServerCommandLineInterface(serverInterface, serverLog, document.querySelector(SERVER_CLI_ELEMENT));
 
 /**
  * Neutralino startup

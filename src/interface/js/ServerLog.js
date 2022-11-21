@@ -2,7 +2,7 @@ export class ServerLog {
 
   #serverLogElement;
   #serverStatusMarker;
-	#serverMessageStyle ='background: purple; color: white; padding:1px 5px 1px 5px; border-radius: 3px';
+	#serverMessageStyle ='background: purple; color: white; padding:1px 5px 1px 5px; border-radius: 3px; ';
 
   constructor(serverLogElement, serverStatusMarker) {
     this.#serverLogElement = serverLogElement;
@@ -21,8 +21,8 @@ export class ServerLog {
 		}
 	}
 
-	async receivedStdOut(string) {
-		if (/^\s*%STATUS%/.test(string)) this.#writeToServerLog(string);
+	async receivedStdOut(string, internalMessage = false) {
+		if (internalMessage === true || /^\s*%STATUS%/.test(string)) this.#writeToServerLog(string);
 		else {
 			let output = string;
 			if (/\s*"\s*(\{|\[)/.test(string)) {

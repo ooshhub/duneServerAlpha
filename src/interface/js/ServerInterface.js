@@ -16,6 +16,8 @@ export class ServerInterface {
   constructor(serverLogger, serverFIlePath) {
     this.#logger = serverLogger;
     this.#serverPath = serverFIlePath;
+    this.#startServerListeners();
+
   }
 
   async #spawnServer() {
@@ -26,8 +28,6 @@ export class ServerInterface {
       console.info(`Removed processes, server is: `, this.#server);
     }
     Object.assign(this.#server, await Neutralino.os.spawnProcess(`node ${this.#serverPath}`));
-    this.#startServerListeners();
-
   }
 
   #startServerListeners() {
@@ -68,17 +68,20 @@ export class ServerInterface {
   }
 
   async destroyAllServers(id) {
+    let destroyed = 0;
     const ids = id
       ? [ id ]
       : Object.values(await Neutralino.os.getSpawnedProcesses()).map(v => v.id);
-    console.log(ids);
     for (let i = 0; i < ids.length; i++) {
       await Neutralino.os.updateSpawnedProcess(ids[i], 'exit');
+      destroyed++;
     }
     Object.assign(this.#server, { id: null, pid: null });
+    if (destroyed) this.#logger.receivedStdOut(`Server destroyed. You monster.`, true);
   }
 
   async sendMessageToServer(message, command) {
+    if (!this.#server) return false;
     const commandString = command && COMMANDS[command] ? COMMANDS[command] : '';
     let updated = true;
     await Neutralino.os.updateSpawnedProcess(this.#server.id, 'stdIn', `${commandString}${message}\n`)

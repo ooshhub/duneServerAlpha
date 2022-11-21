@@ -124,16 +124,16 @@ h1, h2, h3, h4, h5, h6 {
 	padding: 0.25rem 0.5rem;
 }
 
- ::-webkit-scrollbar {
+#server-log ::-webkit-scrollbar {
 		width: 0.5rem;
 	}
 
-	::-webkit-scrollbar-track {
+#server-log	::-webkit-scrollbar-track {
 		background: #001d00;
 		border-radius: 5px;
 	}
 
-	::-webkit-scrollbar-thumb {
+#server-log	::-webkit-scrollbar-thumb {
 		background: #036d03;
 		border-radius: 5px;
 	} 
