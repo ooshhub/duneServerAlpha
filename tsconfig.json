@@ -4,9 +4,10 @@
 	],
 	"include": [
 		"./src/server/**/*",
+		"./src/types/**/*"
 	],
 	"compilerOptions": {
-		"typeRoots": [ "./src/@types", ],
+		"typeRoots": [ "/src/types" ],
 		"rootDir": "./src/server",
 		"outDir": "./build/ts",
 		"target": "ES2022",

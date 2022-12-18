@@ -1,5 +1,7 @@
 import { open } from "fs/promises";
 import { FileHandle } from "fs/promises";
+import { Helpers } from "../Helpers";
+import { LogLevel } from "./ServerLogger";
 
 enum LogStates {
 	INIT	= 'init',
@@ -16,7 +18,7 @@ enum LogTypes {
 	DEBUG	= 'DEBUG'
 }
 
-export class Logger {
+export class FileLoggingService {
 
 	#log: FileHandle|null = null;
 	#logState:LogStates = LogStates.INIT;
@@ -71,6 +73,13 @@ export class Logger {
 	async debug(msg: string): Promise<void> {
 		if (!this.#debug) return;
 		this.#writeLog(msg, LogTypes.DEBUG);
+	}
+
+	async writeToLogFile(logLevel: LogLevel, messages: any[]) {
+		if (!this[logLevel]) return;
+		messages.forEach(msg => {
+			this[logLevel](Helpers.stringifyMixed(msg));
+		});
 	}
 
 }
