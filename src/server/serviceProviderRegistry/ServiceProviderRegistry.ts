@@ -8,7 +8,8 @@ import { StdInReaderInterface } from "./interfaces/StdInReaderInterface";
 const defaultServiceProviders = {
 	loggingService: ServerLogger,
 	directoryService: PlayerDirectoryService,
-	playerLinkService: SocketServer
+	playerLinkService: SocketServer,
+	localHub: EventHub,
 }
 
 export class ServiceProviderRegistry {
@@ -19,6 +20,7 @@ export class ServiceProviderRegistry {
 	#rulesetControl: RulesetInterface;
 
 	#playerLinkService: PlayerLinkInterface;
+	#localHubService: LocalHubInterface;
 	#directoryService: PlayerDirectoryService;
 
 	// Secondary Providers
@@ -29,6 +31,7 @@ export class ServiceProviderRegistry {
 		loggingService = defaultServiceProviders.loggingService,
 		rulesetControl = defaultServiceProviders.rulesetControl,
 		localStorage = defaultServiceProviders.localStorage,
+		localHubService = defaultServiceProviders.localHub,
 		directoryService = defaultServiceProviders.directoryService,
 		playerLinkService = defaultServiceProviders.playerLinkService
 	)
@@ -38,6 +41,7 @@ export class ServiceProviderRegistry {
 
 		this.#stdInReader = stdInReader;
 
+		this.#localHubService = new localHubService();
 		this.#directoryService = new directoryService();
 		this.#playerLinkService = new playerLinkService(this.#directoryService);
 
