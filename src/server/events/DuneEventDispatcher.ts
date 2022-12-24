@@ -1,19 +1,7 @@
-/**
- * Things this needs to do
- * - send events to players. Will need to use the Directory service for this
- * - send server events over localhub
- * - handle requests - both player requests via playerLinkService and local request via the hub
- * - wrap requests in a DuneEvent if required
- * 
- * 
- * dispatch('updatePlayerList')
- * dispatchRequest('players/cardOpportunity')
- * 
-*/
-
 import { DuneError } from "../errors/DuneError";
 import { ERROR } from "../errors/errors";
-import { PlayerLinkInterface } from "../serviceProviderRegistry/interfaces/PlayerLinkInterface";
+import { LocalHubContract } from "../serviceProviderRegistry/contracts/LocalHubContract";
+import { PlayerLinkContract } from "../serviceProviderRegistry/contracts/PlayerLinkContract";
 import { DuneServerEvent, DuneServerResponse } from "./DuneServerEvent";
 
 export enum EventDomains {
@@ -23,10 +11,10 @@ export enum EventDomains {
 
 export class DuneEventDispatcher {
 
-	#playerLinkService: PlayerLinkInterface;
-	#localHubService: LocalHubInterface;
+	#playerLinkService: PlayerLinkContract;
+	#localHubService: LocalHubContract;
 
-	constructor(dispatcherConfig: GenericJson = {}, playerLinkService: PlayerLinkInterface, localHubService: LocalHubInterface) {
+	constructor(dispatcherConfig: GenericJson = {}, playerLinkService: PlayerLinkContract, localHubService: LocalHubContract) {
 		this.name = dispatcherConfig.name || 'duneEventDispatcher';
 		this.#playerLinkService = playerLinkService;
 		this.#localHubService = localHubService;
@@ -91,8 +79,8 @@ export class DuneEventDispatcher {
 			? eventNameOrDuneEvent
 			: this.#createEvent(eventNameOrDuneEvent, duneEvent);
 		if (!event) throw new DuneError(ERROR.BAD_EVENT_DATA);
-		if (domain === EventDomains.PLAYERS) return this.#playerLinkService.sendPlayerRequest(event);
-		else if (domain === EventDomains.SERVER) return this.#localHubService.request(event);
+		if (domain === EventDomains.PLAYERS) return await this.#playerLinkService.sendPlayerRequest(event);
+		else if (domain === EventDomains.SERVER) return [ await this.#localHubService.request(event) ];
 		else throw new DuneError(ERROR.BAD_EVENT_DOMAIN, [ domain ]);
 	}
 }

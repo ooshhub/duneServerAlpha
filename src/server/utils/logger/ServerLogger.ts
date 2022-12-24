@@ -1,7 +1,7 @@
 // Unsure about this one
 
 import { ERROR } from "../../errors/errors";
-import { ConsoleLoggingInterface } from "../../serviceProviderRegistry/interfaces/ConsoleLoggingInterface";
+import { ConsoleLoggingContract } from "../../serviceProviderRegistry/contracts/ConsoleLoggingContract";
 import { FileLoggingService } from "./FileLogger";
 import { InterfaceMessagingService } from "./InterfaceMessagingService";
 
@@ -34,9 +34,9 @@ export class ServerLogger {
 
 	#fileLogger: FileLoggingService;
 	#interfaceMessaging: InterfaceMessagingService;
-	#consoleLogger: ConsoleLoggingInterface;
+	#consoleLogger: ConsoleLoggingContract;
 
-	constructor(fileLogger?: FileLoggingService, interfaceLogger?: InterfaceMessagingService, consoleLoggger?: ConsoleLoggingInterface) {
+	constructor(fileLogger?: FileLoggingService, interfaceLogger?: InterfaceMessagingService, consoleLoggger?: ConsoleLoggingContract) {
 		this.#fileLogger = fileLogger ?? defaultLoggers.fileLogger;
 		this.#interfaceMessaging = interfaceLogger ?? defaultLoggers.interfaceMessaging;
 		this.#consoleLogger = consoleLoggger ?? defaultLoggers.consoleLogger;

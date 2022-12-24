@@ -1,3 +1,4 @@
+import { PlayerLinkContract } from "../serviceProviderRegistry/contracts/PlayerLinkContract";
 import { ServiceProviderRegistry } from "../serviceProviderRegistry/ServiceProviderRegistry";
 
 export class ServerApp {
@@ -6,7 +7,7 @@ export class ServerApp {
 	#lobbyManager: LobbyManager;
 	#rulesetManager: RulesetInterface;
 
-	#clientLink: ClientLinkInterface;
+	#clientLink: PlayerLinkContract;
 	#commandReader: StdInReaderInterface;
 
 	#localStorageManager: LocalStorageInterface;

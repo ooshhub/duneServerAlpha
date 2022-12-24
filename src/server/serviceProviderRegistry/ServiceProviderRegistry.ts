@@ -1,33 +1,37 @@
+import { DuneEventHub } from "../events/DuneEventHub";
 import { PlayerDirectoryService } from "../net/PlayerDirectoryService";
 import { SocketServer } from "../net/SocketServer";
+import { InterfaceMessagingService } from "../utils/logger/InterfaceMessagingService";
 import { ServerLogger } from "../utils/logger/ServerLogger";
-import { ConsoleLoggingInterface } from "./interfaces/ConsoleLoggingInterface";
-import { PlayerLinkInterface } from "./interfaces/PlayerLinkInterface";
-import { StdInReaderInterface } from "./interfaces/StdInReaderInterface";
+import { ConsoleLoggingContract } from "./contracts/ConsoleLoggingContract";
+import { LocalHubContract } from "./contracts/LocalHubContract";
+import { PlayerLinkContract } from "./contracts/PlayerLinkContract";
+import { StdIoMessagingContract } from "./contracts/StdIoMessagingContract";
 
 const defaultServiceProviders = {
 	loggingService: ServerLogger,
 	directoryService: PlayerDirectoryService,
 	playerLinkService: SocketServer,
-	localHub: EventHub,
+	localHub: DuneEventHub,
+	stdIoMessaging: InterfaceMessagingService,
 }
 
 export class ServiceProviderRegistry {
 
 	// Essential Providers
-	#stdInReader: StdInReaderInterface; 
+	#stdIoMessaging: StdIoMessagingContract; 
 	#localStorage: LocalStorageInterface;
 	#rulesetControl: RulesetInterface;
 
-	#playerLinkService: PlayerLinkInterface;
-	#localHubService: LocalHubInterface;
+	#playerLinkService: PlayerLinkContract;
+	#localHubService: LocalHubContract;
 	#directoryService: PlayerDirectoryService;
 
 	// Secondary Providers
-	#loggingService: ConsoleLoggingInterface
+	#loggingService: ConsoleLoggingContract
 
 	constructor(
-		stdInReader = defaultServiceProviders.stdInReader,
+		stdIoMessaging = defaultServiceProviders.stdIoMessaging,
 		loggingService = defaultServiceProviders.loggingService,
 		rulesetControl = defaultServiceProviders.rulesetControl,
 		localStorage = defaultServiceProviders.localStorage,
@@ -39,7 +43,7 @@ export class ServiceProviderRegistry {
 		this.#loggingService = new loggingService();
 		global.logger = this.#loggingService;
 
-		this.#stdInReader = stdInReader;
+		this.#stdIoMessaging = stdIoMessaging;
 
 		this.#localHubService = new localHubService();
 		this.#directoryService = new directoryService();
@@ -50,7 +54,7 @@ export class ServiceProviderRegistry {
 
 	}
 
-	get stdInReader() { return this.#stdInReader }
+	get stdIoMessaging() { return this.#stdIoMessaging }
 	get clientLinkProvider() { return this.#playerLinkService }
 	get rulesetControl() { return this.#rulesetControl }
 	get localStorage() { return this.#localStorage }

@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { DuneError } from "../errors/DuneError";
 import { ERROR } from "../errors/errors";
 import { DuneEvent, DuneServerEvent, DuneServerResponse } from "../events/DuneServerEvent";
-import { PlayerLinkInterface } from "../serviceProviderRegistry/interfaces/PlayerLinkInterface";
+import { PlayerLinkContract } from "../serviceProviderRegistry/contracts/PlayerLinkContract";
 import { Helpers } from "../utils/Helpers";
 import { LogType } from "../utils/logger/ServerLogger";
 import { PlayerDirectoryService } from "./PlayerDirectoryService";
@@ -54,9 +54,9 @@ export enum SocketServerObserverType {
 	REQUEST = 'request',
 }
 
-export type DuneEventHandler = (message: DuneEvent|GenericJson, ...args: any[]) => void;
+export type DuneEventHandler = (message: DuneEvent|DuneServerEvent|GenericJson, ...args: any[]) => void;
 
-export class SocketServer implements PlayerLinkInterface {
+export class SocketServer implements PlayerLinkContract {
 
 	#io?: Server
 	#state = ServerState.INIT;

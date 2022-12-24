@@ -1,4 +1,5 @@
 import readLine from "readline/promises";
+import { StdIoMessagingContract } from "../../serviceProviderRegistry/contracts/StdIoMessagingContract";
 import { Helpers } from "../Helpers";
 import { LogLevel } from "./ServerLogger";
 
@@ -15,7 +16,7 @@ export enum InterfaceMessageType {
 
 const RX_SERVER_COMMAND = /%COMMAND:(\w+)%/
 
-export class InterfaceMessagingService {
+export class InterfaceMessagingService implements StdIoMessagingContract {
 
 	#commandObservers: GenericFunction[] = [];
 	#stdInInterface;

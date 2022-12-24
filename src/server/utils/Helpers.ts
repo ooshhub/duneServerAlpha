@@ -51,10 +51,46 @@ export class Helpers {
 		return new Promise<boolean>(res => setTimeout(() => res(false), milliseconds));
 	}
 
+	/**
+	 * Generate a random number within a range, accounting for modulo bias
+	 * @param range 
+	 * @param depth 
+	 * @returns 
+	 */
+	static randomInt(range=100, depth=32): number {
+    const max = range * 2**depth;
+    let random;
+    do { random = Math.floor(Math.random() * 2**depth) }
+    while (random >= max);
+    return random % range;
+  }
+
+	/**
+	 * Generate a 20-char firebase style UID
+	 * Overload 1 (no args) - a single ID
+	 * Overload 2 (int) - array of simultaneous IDs, guaranteed to not collide
+	 * 
+	 * @param {number|null} numIds 
+	 */
+	static generateUID(numIds?: null): string;
+	static generateUID(numIds: number): string[];
+	
+  static generateUID(numIds?: number|null): string|string[] {
+    let output: string[] = [], key = '';
+    const chars = '-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
+    let ts = Date.now();
+    for (let i = 8; i > 0; i--) { output[i] = chars.charAt(ts % 64), ts = Math.floor(ts / 64) }
+    for (let j = 0; j < 12; j++) { output.push(chars.charAt(this.randomInt(64))) }
+    key = output.join('');
+    if (numIds && numIds >= 1) {
+      numIds = Math.min(32, numIds);
+      output = Array(numIds).fill(null).map((_v,i) => {
+        const lastChar = chars[(chars.indexOf(key[19])+i)%64];
+        return `${key.slice(0,18)}${lastChar}`;
+      });
+      return output;
+    }
+		else return key;
+  }
+
 }
-
-const arr = [1,2,3,4,5,6];
-
-Helpers.filterInPlace(arr, v => v !== 5);
-
-console.log(arr);

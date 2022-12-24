@@ -1,6 +1,6 @@
 // global types
 
-import { ConsoleLoggingInterface } from "../server/serviceProviderRegistry/interfaces/ConsoleLoggingInterface";
+import { ConsoleLoggingContract } from "../server/serviceProviderRegistry/contracts/ConsoleLoggingContract";
 
 declare global {
 
@@ -11,7 +11,7 @@ declare global {
 	type GenericJson = { [key: string]: any }
 
 	namespace globalThis {
-		var logger: ConsoleLoggingInterface;
+		var logger: ConsoleLoggingContract;
 	}
 
 }
