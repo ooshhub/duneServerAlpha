@@ -8,6 +8,10 @@ import { LocalHubContract } from "./contracts/LocalHubContract";
 import { PlayerLinkContract } from "./contracts/PlayerLinkContract";
 import { StdIoMessagingContract } from "./contracts/StdIoMessagingContract";
 
+type GenericClass = {
+	new: () => object;
+}
+
 const defaultServiceProviders = {
 	loggingService: [ ServerLogger ],
 	directoryService: [ PlayerDirectoryService ],
@@ -54,7 +58,10 @@ export class ServiceProviderRegistry {
 
 	}
 
-	#registerServiceProvider(serviceProvider: any[])
+	#registerServiceProvider(serviceProviderConfig: any[]): object {
+		const ServiceClass = serviceProviderConfig.shift();
+		return new ServiceClass(...serviceProviderConfig);
+	}
 
 	get stdIoMessaging() { return this.#stdIoMessaging }
 	get clientLinkProvider() { return this.#playerLinkService }

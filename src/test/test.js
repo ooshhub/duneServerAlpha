@@ -1,17 +1,12 @@
-const int = setInterval(() => {
-  console.log('blah');
-}, 0);
-
-let counter = 0;
+import { readFile } from "fs/promises";
 
 
-const int2 = setInterval(async () => {
-  console.log(counter += 1);
-}, 0);
+const getFile = async(path) => {
+  return readFile(path, { encoding: 'utf-8' })/* .then(response => {
+    // return response;
+  }) */.catch(err => {
+    return new Error(err.message);
+  }).finally(() => console.log('fin'));
+}
 
-setTimeout(async () => {
-  const p = () => new Promise(res => res('promise'));
-  console.log(await p());
-}, 0);
-
-
+getFile('./src/test/test.txt').then(response => console.log(response));
