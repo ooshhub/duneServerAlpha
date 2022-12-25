@@ -28,6 +28,7 @@
     "vue": "^3.2.45"
   },
   "dependencies": {
+    "npm": "^9.2.0",
     "socket.io": "^4.5.4"
   }
 }

@@ -9,11 +9,11 @@ import { PlayerLinkContract } from "./contracts/PlayerLinkContract";
 import { StdIoMessagingContract } from "./contracts/StdIoMessagingContract";
 
 const defaultServiceProviders = {
-	loggingService: ServerLogger,
-	directoryService: PlayerDirectoryService,
-	playerLinkService: SocketServer,
-	localHub: DuneEventHub,
-	stdIoMessaging: InterfaceMessagingService,
+	loggingService: [ ServerLogger ],
+	directoryService: [ PlayerDirectoryService ],
+	playerLinkService: [ SocketServer ],
+	localHub: [ DuneEventHub ],
+	stdIoMessaging: [ InterfaceMessagingService ],
 }
 
 export class ServiceProviderRegistry {
@@ -53,6 +53,8 @@ export class ServiceProviderRegistry {
 		this.localStorage = localStorage;
 
 	}
+
+	#registerServiceProvider(serviceProvider: any[])
 
 	get stdIoMessaging() { return this.#stdIoMessaging }
 	get clientLinkProvider() { return this.#playerLinkService }
