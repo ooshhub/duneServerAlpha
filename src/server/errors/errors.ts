@@ -24,4 +24,10 @@ export const ERROR = {
 	PLAYER_RESPONSE_TIMEOUT: `Player %0 did not respond within the %1ms timeout`,
 	EMPTY_RESPONSE: `Received response but no data sent to constructor`,
 
+	// IO
+	FILE_QUEUE_UNRESPONSIVE: `File IO queue is unresponsive.`,
+	FILE_READ_ERROR: `Failed to read file "%0"`,
+	IO_JOB_TYPE_UNKNOWN: `The supplied File IO job type was invalid, "%0"`,
+	BAD_WRITE_DATA: `Data supplied to FileWrite must be a string or JSON`,
+
 }

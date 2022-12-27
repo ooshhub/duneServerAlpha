@@ -1,5 +1,5 @@
-import { DuneError } from "../errors/DuneError";
-import { ERROR } from "../errors/errors";
+import { DuneError } from "../errors/DuneError.js";
+import { ERROR } from "../errors/errors.js";
 
 export class Helpers {
 	constructor() { throw new DuneError(ERROR.NO_INSTANTIATION, [ this.constructor.name ]) }

@@ -1,12 +1,23 @@
-import { readFile } from "fs/promises";
+import { NodeFileManager } from "../server/io/NodeFileManager.js";
 
+const fileManager = new NodeFileManager({ name: 'testy', basePath: './src/test' });
 
-const getFile = async(path) => {
-  return readFile(path, { encoding: 'utf-8' })/* .then(response => {
-    // return response;
-  }) */.catch(err => {
-    return new Error(err.message);
-  }).finally(() => console.log('fin'));
-}
+const file = 'test2.txt';
 
-getFile('./src/test/test.txt').then(response => console.log(response));
+(async () => {
+  fileManager.readLocalFile(file)
+    .then(response => console.log(response))
+    .catch(() => console.log('err'));
+  fileManager.writeLocalFile(file, 'fuck you')
+    .then(response => console.log(response))
+    .catch(() => console.log('err'));  
+  fileManager.readLocalFile(file)
+    .then(response => console.log(response))
+    .catch(() => console.log('err'));  
+  fileManager.writeLocalFile(file, 'still a cunt')
+    .then(response => console.log(response))
+    .catch(() => console.log('err'));
+  fileManager.readLocalFile(file)
+    .then(response => console.log(response))
+    .catch(() => console.log('err'));
+})();
