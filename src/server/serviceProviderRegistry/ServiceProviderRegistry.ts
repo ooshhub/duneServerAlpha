@@ -1,35 +1,69 @@
-import { DuneEventHub } from "../events/DuneEventHub";
-import { PlayerDirectoryService } from "../net/PlayerDirectoryService";
-import { SocketServer } from "../net/SocketServer";
-import { InterfaceMessagingService } from "../utils/logger/InterfaceMessagingService";
-import { ServerLogger } from "../utils/logger/ServerLogger";
-import { ConsoleLoggingContract } from "./contracts/ConsoleLoggingContract";
-import { LocalHubContract } from "./contracts/LocalHubContract";
-import { PlayerLinkContract } from "./contracts/PlayerLinkContract";
-import { StdIoMessagingContract } from "./contracts/StdIoMessagingContract";
+import { LocalStorageConfig, LocalStorageContract } from "./contracts/LocalStorageContract.js";
+import { DuneEventHub } from "../events/DuneEventHub.js";
+import { NodeFileManager } from "../io/NodeFileManager.js";
+import { PlayerDirectoryService } from "../net/PlayerDirectoryService.js";
+import { SocketServer } from "../net/SocketServer.js";
+import { InterfaceMessagingService } from "../io/InterfaceMessagingService.js";
+import { ServerLogger } from "../utils/logger/ServerLogger.js";
+import { ConsoleLoggingContract } from "./contracts/ConsoleLoggingContract.js";
+import { LocalHubConfig, LocalHubContract } from "./contracts/LocalHubContract.js";
+import { PlayerLinkContract, SocketServerConfig } from "./contracts/PlayerLinkContract.js";
+import { StdIoMessagingContract, StdIoMessengerConfig } from "./contracts/StdIoMessagingContract.js";
+import { ServerLoggerConfig } from "./contracts/ServerLoggingContract.js";
+import { PlayerDirectoryServiceConfig, PlayerDirectoryServiceContract } from "./contracts/PlayerDirectoryServiceContract.js";
 
-type GenericClass = {
-	new: () => object;
+type GenericClass<Type> = {
+	new( ...args: any[]): Type;
 }
 
-const defaultServiceProviders = {
-	loggingService: [ ServerLogger ],
-	directoryService: [ PlayerDirectoryService ],
-	playerLinkService: [ SocketServer ],
-	localHub: [ DuneEventHub ],
-	stdIoMessaging: [ InterfaceMessagingService ],
+type ProviderConstructorArguments<ConfigType> = [ ConfigType ] 
+
+export type ServiceProviderConfiguration = {
+	provider: GenericClass<any>,
+	constructorArguments: ProviderConstructorArguments<any>,
+}
+
+type DefaultServiceProviders = {
+	[providerName: string]: ServiceProviderConfiguration
+}
+
+
+const defaultServiceProviders: DefaultServiceProviders = {
+	loggingService: {
+		provider: ServerLogger,
+		constructorArguments: ([ {} ] as [ ServerLoggerConfig ]),
+	},
+	directoryService: {
+		provider: PlayerDirectoryService,
+		constructorArguments: ([{ name: 'PlayerDirectory' }] as [ PlayerDirectoryServiceConfig ]),
+	},
+	playerLinkService: {
+		provider: SocketServer,
+		constructorArguments: ([{ name: 'DuneSocketServer' }] as [ SocketServerConfig ]),
+	},
+	localHub: {
+		provider: DuneEventHub,
+		constructorArguments: ([{ name: 'ServerHub' }] as [ LocalHubConfig ]),
+	},
+	stdIoMessaging: {
+		provider: InterfaceMessagingService,
+		constructorArguments: ([ { autoInitialiseListeners: true } ] as [ StdIoMessengerConfig ]),
+	},
+	localStorageService: {
+		provider: NodeFileManager,
+		constructorArguments: ([{ name: 'NodeLocalStorageManager', basePath: './src/server'}] as [ LocalStorageConfig ]),
+	},
 }
 
 export class ServiceProviderRegistry {
 
 	// Essential Providers
 	#stdIoMessaging: StdIoMessagingContract; 
-	#localStorage: LocalStorageInterface;
-	#rulesetControl: RulesetInterface;
+	#localStorage: LocalStorageContract;
 
 	#playerLinkService: PlayerLinkContract;
 	#localHubService: LocalHubContract;
-	#directoryService: PlayerDirectoryService;
+	#directoryService: PlayerDirectoryServiceContract;
 
 	// Secondary Providers
 	#loggingService: ConsoleLoggingContract
@@ -37,36 +71,30 @@ export class ServiceProviderRegistry {
 	constructor(
 		stdIoMessaging = defaultServiceProviders.stdIoMessaging,
 		loggingService = defaultServiceProviders.loggingService,
-		rulesetControl = defaultServiceProviders.rulesetControl,
-		localStorage = defaultServiceProviders.localStorage,
+		localStorage = defaultServiceProviders.localStorageService,
 		localHubService = defaultServiceProviders.localHub,
 		directoryService = defaultServiceProviders.directoryService,
 		playerLinkService = defaultServiceProviders.playerLinkService
 	)
 	{
-		this.#loggingService = new loggingService();
+		this.#loggingService = new loggingService.provider(...loggingService.constructorArguments);
 		global.logger = this.#loggingService;
+		this.#directoryService = new directoryService.provider(...directoryService.constructorArguments);
+		global.playerDirectory = this.#directoryService;
 
-		this.#stdIoMessaging = stdIoMessaging;
+		this.#stdIoMessaging = new stdIoMessaging.provider(...stdIoMessaging.constructorArguments);
 
-		this.#localHubService = new localHubService();
-		this.#directoryService = new directoryService();
-		this.#playerLinkService = new playerLinkService(this.#directoryService);
+		this.#localHubService = new localHubService.provider(...(localHubService.constructorArguments));
+		this.#playerLinkService = new playerLinkService.provider(...playerLinkService.constructorArguments);
 
-		this.rulesetControl = rulesetControl;
-		this.localStorage = localStorage;
+		this.#localStorage = new localStorage.provider(...localStorage.constructorArguments);
 
 	}
 
-	#registerServiceProvider(serviceProviderConfig: any[]): object {
-		const ServiceClass = serviceProviderConfig.shift();
-		return new ServiceClass(...serviceProviderConfig);
-	}
-
-	get stdIoMessaging() { return this.#stdIoMessaging }
-	get clientLinkProvider() { return this.#playerLinkService }
-	get rulesetControl() { return this.#rulesetControl }
-	get localStorage() { return this.#localStorage }
-	get loggingService() { return this.#loggingService }
+	get stdIoMessaging() { return this.#stdIoMessaging; }
+	get playerLinkProvider() { return this.#playerLinkService; }
+	get localStorage() { return this.#localStorage; }
+	get loggingService() { return this.#loggingService; }
+	get localHubService() { return this.#localHubService ;}
 
 }

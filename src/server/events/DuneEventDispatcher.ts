@@ -1,12 +1,18 @@
-import { DuneError } from "../errors/DuneError";
-import { ERROR } from "../errors/errors";
-import { LocalHubContract } from "../serviceProviderRegistry/contracts/LocalHubContract";
-import { PlayerLinkContract } from "../serviceProviderRegistry/contracts/PlayerLinkContract";
-import { DuneServerEvent, DuneServerResponse } from "./DuneServerEvent";
+import { DuneError } from "../errors/DuneError.js";
+import { ERROR } from "../errors/errors.js";
+import { LocalHubContract } from "../serviceProviderRegistry/contracts/LocalHubContract.js";
+import { PlayerLinkContract } from "../serviceProviderRegistry/contracts/PlayerLinkContract.js";
+import { DuneServerEvent, DuneServerResponse } from "./DuneServerEvent.js";
 
 export enum EventDomains {
 	PLAYERS = 'players',
 	SERVER = 'server',
+}
+
+export type DuneEventDispatcherConfig = {
+	name: string, 
+	playerLinkService: PlayerLinkContract, 
+	localHubService: LocalHubContract
 }
 
 export class DuneEventDispatcher {
@@ -14,10 +20,10 @@ export class DuneEventDispatcher {
 	#playerLinkService: PlayerLinkContract;
 	#localHubService: LocalHubContract;
 
-	constructor(dispatcherConfig: GenericJson = {}, playerLinkService: PlayerLinkContract, localHubService: LocalHubContract) {
+	constructor(dispatcherConfig: DuneEventDispatcherConfig) {
 		this.name = dispatcherConfig.name || 'duneEventDispatcher';
-		this.#playerLinkService = playerLinkService;
-		this.#localHubService = localHubService;
+		this.#playerLinkService = dispatcherConfig.playerLinkService;
+		this.#localHubService = dispatcherConfig.localHubService;
 	}
 
 	name: string;

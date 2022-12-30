@@ -1,4 +1,9 @@
-import { DuneError } from "../errors/DuneError";
+import { DuneError } from "../../errors/DuneError.js";
+
+export type LocalStorageConfig = {
+	name: string,
+	basePath: string,
+}
 
 export interface LocalStorageContract {
 	readLocalFile: (pathToFile: string) => Promise<string|DuneError>;

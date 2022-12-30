@@ -1,3 +1,5 @@
+import { PlayerDirectoryServiceConfig, PlayerDirectoryServiceContract } from "../serviceProviderRegistry/contracts/PlayerDirectoryServiceContract.js";
+
 interface PlayerRecord {
 
 	playerName: string;
@@ -48,20 +50,21 @@ export class PlayerListTransformer {
 	}
 }
 
-export class PlayerDirectoryService {
+export class PlayerDirectoryService implements PlayerDirectoryServiceContract {
 
 	#playerList: { [key: string]: PlayerRecord } = {};
 	#houseList: { [key: string]: HouseRecord } = {};
+	#name;
 
-	constructor() {
-		// do things
+	constructor(playerDirectoryConfig: PlayerDirectoryServiceConfig) {
+		this.#name = playerDirectoryConfig.name ?? 'PlayerDirectoryService';
 	}
 
 	/**
 	 * Update the player list - call from SocketServer whenever required
 	 * @param serverPlayerList 
 	 */
-	updatePlayerList(serverPlayerList: { [key: string]: PlayerRecord }) {
+	#updatePlayerList(serverPlayerList: { [key: string]: PlayerRecord }) {
 		const playerTransform = PlayerListTransformer.transformForDirectory(serverPlayerList);
 		for (const player in playerTransform) {
 			if (this.#playerList[player]) this.#updatePlayer(playerTransform[player]);
@@ -82,7 +85,7 @@ export class PlayerDirectoryService {
 	 * Update the House list from GameCore
 	 * @param transformedHouseList 
 	 */
-	updateHouseList(transformedHouseList: { [key: string]: HouseRecord }) {
+	#updateHouseList(transformedHouseList: { [key: string]: HouseRecord }) {
 		for (const house in transformedHouseList) {
 			if (this.#houseList[house]) this.#updateHouse(transformedHouseList[house]);
 			else this.#houseList[house] = transformedHouseList[house];

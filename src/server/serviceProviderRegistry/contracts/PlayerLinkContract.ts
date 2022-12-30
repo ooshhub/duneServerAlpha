@@ -1,5 +1,9 @@
-import { DuneServerEvent, DuneServerResponse } from "../../events/DuneServerEvent";
-import { DuneEventHandler, HostOptions, ServerOptions, SocketServerObserverType } from "../../net/SocketServer";
+import { DuneServerEvent, DuneServerResponse } from "../../events/DuneServerEvent.js";
+import { DuneEventHandler, HostOptions, ServerOptions, SocketServerObserverType } from "../../net/SocketServer.js";
+
+export type SocketServerConfig = {
+	name: string,
+}
 
 export interface PlayerLinkContract {
 	setupServer: (serverOptions: ServerOptions, playerDetails: HostOptions) => void;

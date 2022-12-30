@@ -17,3 +17,6 @@ neutralino.js
 # Neutralinojs related files
 .storage
 *.log
+
+# environment settings
+.env

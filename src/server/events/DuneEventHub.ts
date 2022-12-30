@@ -1,10 +1,10 @@
-import { DuneError } from "../errors/DuneError";
-import { ERROR } from "../errors/errors";
+import { DuneError } from "../errors/DuneError.js";
+import { ERROR } from "../errors/errors.js";
 import { DuneEventHandler } from "../net/SocketServer"
-import { LocalHubContract } from "../serviceProviderRegistry/contracts/LocalHubContract";
-import { Helpers } from "../utils/Helpers";
-import { EventDomains } from "./DuneEventDispatcher";
-import { DuneEventType, DuneServerEvent, DuneServerRequest, DuneServerResponse } from "./DuneServerEvent";
+import { LocalHubConfig, LocalHubContract } from "../serviceProviderRegistry/contracts/LocalHubContract.js";
+import { Helpers } from "../utils/Helpers.js";
+import { EventDomains } from "./DuneEventDispatcher.js";
+import { DuneEventType, DuneServerEvent, DuneServerRequest, DuneServerResponse } from "./DuneServerEvent.js";
 
 type EventRegistry = { [eventName: string]: DuneEventHandler[] }
 
@@ -20,7 +20,7 @@ export class DuneEventHub implements LocalHubContract {
 
 	#name = 'DuneEventHub';
 
-	constructor(eventHubConfig: GenericJson = {}) {
+	constructor(eventHubConfig: LocalHubConfig) {
 		this.#name = eventHubConfig.name || this.#name;
 	}
 

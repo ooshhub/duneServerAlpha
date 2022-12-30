@@ -1,12 +1,12 @@
 import { createServer } from "http";
 import { Server, Socket } from 'socket.io';
-import { DuneError } from "../errors/DuneError";
-import { ERROR } from "../errors/errors";
-import { DuneEvent, DuneServerEvent, DuneServerResponse } from "../events/DuneServerEvent";
-import { PlayerLinkContract } from "../serviceProviderRegistry/contracts/PlayerLinkContract";
-import { Helpers } from "../utils/Helpers";
-import { LogType } from "../utils/logger/ServerLogger";
-import { PlayerDirectoryService } from "./PlayerDirectoryService";
+import { DuneError } from "../errors/DuneError.js";
+import { ERROR } from "../errors/errors.js";
+import { DuneEvent, DuneServerEvent, DuneServerResponse } from "../events/DuneServerEvent.js";
+import { PlayerLinkContract, SocketServerConfig } from "../serviceProviderRegistry/contracts/PlayerLinkContract.js";
+import { Helpers } from "../utils/Helpers.js";
+import { LogType } from "../utils/logger/ServerLogger.js";
+import { PlayerDirectoryService } from "./PlayerDirectoryService.js";
 
 export type ServerOptions = {
 	name: string|undefined,
@@ -66,6 +66,7 @@ export class SocketServer implements PlayerLinkContract {
 
 	#config?: ServerOptions;
 	#host?: HostOptions;
+	#name: string;
 
 	#connectionAttempts: { [key: string]: number } = {};
 	#maxConnectionAttempts = 10;
@@ -74,10 +75,9 @@ export class SocketServer implements PlayerLinkContract {
 
 	#messageObservers: DuneEventHandler[] = [];
 	#requestObservers: DuneEventHandler[] = [];
-	#directoryService: PlayerDirectoryService;
 	
-	constructor(directoryService: PlayerDirectoryService) {
-		this.#directoryService = directoryService;
+	constructor(serverConfig: SocketServerConfig) {
+		this.#name = serverConfig.name ?? 'SocketServer';
 	}
 
 	setupServer(serverOptions: ServerOptions, playerDetails: HostOptions): void {
@@ -339,7 +339,7 @@ export class SocketServer implements PlayerLinkContract {
 	 */
 	async sendPlayerMessage(message: DuneServerEvent, channel = 'message'): Promise<void> {
 		if (message.to?.length) {
-			const targets = this.#directoryService.convertToPlayerIds(message.to);
+			const targets = playerDirectory?.convertToPlayerIds(message.to) ?? [];
 			targets.forEach(target => {
 				if (this.#playerList[target]) this.#playerList[target].emit(channel, message);
 			});

@@ -1,7 +1,7 @@
 import readLine from "readline/promises";
-import { StdIoMessagingContract } from "../../serviceProviderRegistry/contracts/StdIoMessagingContract";
-import { Helpers } from "../Helpers";
-import { LogLevel } from "./ServerLogger";
+import { StdIoMessagingContract, StdIoMessengerConfig } from "../serviceProviderRegistry/contracts/StdIoMessagingContract.js";
+import { Helpers } from "../utils/Helpers.js";
+import { LogLevel } from "../utils/logger/ServerLogger.js";
 
 enum InterfaceLogMarkers {
 	log = '%LOG%',
@@ -21,12 +21,12 @@ export class InterfaceMessagingService implements StdIoMessagingContract {
 	#commandObservers: GenericFunction[] = [];
 	#stdInInterface;
 
-	constructor(autoInitialiseListeners = true) {
+	constructor(messengerConfig: StdIoMessengerConfig) {
 		this.#stdInInterface = readLine.createInterface({
 			input: process.stdin,
 			output: process.stdout,
 		});
-		if (autoInitialiseListeners) this.initialiseListeners();
+		if (messengerConfig.autoInitialiseListeners) this.initialiseListeners();
 	}
 
 	#isCommand(inputLine: string): string|null {

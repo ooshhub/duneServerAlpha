@@ -1,7 +1,10 @@
-import { EventHandlerType } from "../../events/DuneEventHub";
-import { DuneServerEvent, DuneServerResponse } from "../../events/DuneServerEvent";
-import { DuneEventHandler } from "../../net/SocketServer";
+import { EventHandlerType } from "../../events/DuneEventHub.js";
+import { DuneServerEvent, DuneServerResponse } from "../../events/DuneServerEvent.js";
+import { DuneEventHandler } from "../../net/SocketServer.js";
 
+export type LocalHubConfig = {
+	name: string,
+}
 
 export interface LocalHubContract {
 	on: (eventName: string, callback: DuneEventHandler) => void;

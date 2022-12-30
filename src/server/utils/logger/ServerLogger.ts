@@ -1,9 +1,10 @@
 // Unsure about this one
 
-import { ERROR } from "../../errors/errors";
-import { ConsoleLoggingContract } from "../../serviceProviderRegistry/contracts/ConsoleLoggingContract";
-import { FileLoggingService } from "./FileLogger";
-import { InterfaceMessagingService } from "./InterfaceMessagingService";
+import { ERROR } from "../../errors/errors.js";
+import { ConsoleLoggingContract } from "../../serviceProviderRegistry/contracts/ConsoleLoggingContract.js";
+import { ServerLoggerConfig, ServerLoggingContract } from "../../serviceProviderRegistry/contracts/ServerLoggingContract.js";
+import { FileLoggingService } from "./FileLogger.js";
+import { InterfaceMessagingService } from "../../io/InterfaceMessagingService.js";
 
 export enum LogLevel {
 	LOG = 'log',
@@ -23,23 +24,21 @@ export enum LogType {
 }
 
 const defaultLoggers = {
-	fileLogger: new FileLoggingService('DuneServerLog'),
-	interfaceMessaging: new InterfaceMessagingService,
+	fileLogger: new FileLoggingService({ name: 'FileLogger', logName: 'cunt.log', autoInitialise: true }),
 	consoleLogger: console
 }
 
-export class ServerLogger {
+export class ServerLogger implements ServerLoggingContract {
 
 	static instance: ServerLogger | undefined;
 
 	#fileLogger: FileLoggingService;
-	#interfaceMessaging: InterfaceMessagingService;
+	#interfaceMessaging?: InterfaceMessagingService;
 	#consoleLogger: ConsoleLoggingContract;
 
-	constructor(fileLogger?: FileLoggingService, interfaceLogger?: InterfaceMessagingService, consoleLoggger?: ConsoleLoggingContract) {
-		this.#fileLogger = fileLogger ?? defaultLoggers.fileLogger;
-		this.#interfaceMessaging = interfaceLogger ?? defaultLoggers.interfaceMessaging;
-		this.#consoleLogger = consoleLoggger ?? defaultLoggers.consoleLogger;
+	constructor(serverLoggerConfig: ServerLoggerConfig) {
+		this.#fileLogger = serverLoggerConfig.fileLogger ?? defaultLoggers.fileLogger;
+		this.#consoleLogger = serverLoggerConfig.consoleLoggger ?? defaultLoggers.consoleLogger;
 		if (ServerLogger.instance) {
 			console.warn(ERROR.ONLY_ONE_INSTANCE_ALLOWED, [ this.constructor.name ]);
 			return ServerLogger.instance;
@@ -47,25 +46,39 @@ export class ServerLogger {
 		ServerLogger.instance = this;
 	}
 
+	registerInterfaceLogger(interfaceLogger: InterfaceMessagingService): void {
+		this.#interfaceMessaging = interfaceLogger;
+	}
+
+	registerConsoleLogger(consoleLogger: ConsoleLoggingContract): void {
+		this.#consoleLogger = consoleLogger;
+	}
+
+	registerFileLogger(fileLogger: FileLoggingService): void {
+		this.#fileLogger = fileLogger;
+	}
+
+
 	#logToConsole(logLevel: LogLevel, messages: any[]): void {
-		if (this.#consoleLogger[logLevel]) this.#consoleLogger[logLevel](messages);
+		if (this.#consoleLogger[logLevel]) this.#consoleLogger[logLevel](...messages);
 	}
 
 	#logToFile(logLevel: LogLevel, messages: any[]): void {
-		this.#fileLogger.writeToLogFile(logLevel, messages, );
+		this.#fileLogger.writeToLogFile(logLevel, messages);
 	}
 
 	#logToInterface(logLevel: LogLevel, messages: any[]): void {
-		this.#interfaceMessaging.sendLogToInterface(logLevel, messages);
+		if (this.#interfaceMessaging) this.#interfaceMessaging.sendLogToInterface(logLevel, messages);
 	}
 
 	#splitLogType = (inputString: string): string[] => {
 		return inputString.split(',');
 	}
 
-	#determineType(arg1: LogType | any, ...args: any[]): GenericJson {
+	#determineType(...args: any[]): GenericJson {
+		const arg1 = args.shift();
 		const output = { type:<LogType> LogType.C, messages:<any[]> [] };
-		if (arg1 in LogType) {
+		if (Object.values(LogType).includes(arg1)) {
 			output.type = arg1,
 			output.messages = args
 		}
@@ -76,7 +89,8 @@ export class ServerLogger {
 	}
 
 	#createLog(logLevel: LogLevel, ...args: any[]): void {
-		const { type, messages } = this.#determineType(args);
+		const { type, messages } = this.#determineType(...args);
+		if (!type) this.#logToConsole(logLevel, messages);
 		const targets = this.#splitLogType(type);
 		if (targets.includes('console')) this.#logToConsole(logLevel, messages);
 		if (targets.includes('file')) this.#logToFile(logLevel, messages);

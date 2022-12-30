@@ -1,5 +1,5 @@
-import { DuneError } from "../errors/DuneError";
-import { ERROR } from "../errors/errors";
+import { DuneError } from "../errors/DuneError.js";
+import { ERROR } from "../errors/errors.js";
 
 export type ReplyAddress = {
 	domain: 'server',

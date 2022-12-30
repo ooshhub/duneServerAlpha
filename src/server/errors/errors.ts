@@ -30,4 +30,9 @@ export const ERROR = {
 	IO_JOB_TYPE_UNKNOWN: `The supplied File IO job type was invalid, "%0"`,
 	BAD_WRITE_DATA: `Data supplied to FileWrite must be a string or JSON`,
 
+	// Config & Boot
+	CONFIG_ALREADY_BOOTED: `ConfigManager can only boot once, and has already been executed.`,
+	BAD_CONFIG_TYPE: `ConfigManager error setting key "%0" - value "%1" is not of type "%2".`,
+	CONFIG_KEY_NOT_FOUND: `ConfigManager error - config key "%0" not found.`,
+	
 }

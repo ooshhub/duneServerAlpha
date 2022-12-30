@@ -1,13 +1,8 @@
 import { readFile, writeFile } from "fs/promises";
-import { LocalStorageContract } from "../contracts/LocalStorageContract.js";
+import { LocalStorageConfig, LocalStorageContract } from "../serviceProviderRegistry/contracts/LocalStorageContract.js";
 import { DuneError } from "../errors/DuneError.js";
 import { ERROR } from "../errors/errors.js";
 import { Helpers } from "../utils/Helpers.js";
-
-export type FileManagerConfig = {
-	name: string,
-	basePath: string,
-}
 
 enum FileIoJobTypes {
 	READ 	= 'read',
@@ -40,7 +35,7 @@ export class NodeFileManager implements LocalStorageContract {
 
 	#queueStatus: QueueStatus = QueueStatus.IDLE;
 
-	constructor(fileManagerConfig?: FileManagerConfig) {
+	constructor(fileManagerConfig?: LocalStorageConfig) {
 		this.name = fileManagerConfig?.name ?? 'fileManager';
 		this.#basePath = fileManagerConfig?.basePath?.trim().replace(/[\/\\\s]*/, '') ?? './';
 	}

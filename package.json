@@ -5,8 +5,9 @@
   "main": "main.ts",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "servertest": "node ./src/server/tsBuild/main.js"
+    "buildServer": "tsc --build",
+    "watchServer": "tsc --watch",
+    "testServer": "node ./build/ts/main.js"
   },
   "repository": {
     "type": "git",
@@ -28,7 +29,9 @@
     "vue": "~3.2.45"
   },
   "dependencies": {
+    "dotenv": "^16.0.3",
     "npm": "~9.2.0",
-    "socket.io": "~4.5.4"
+    "socket.io": "~4.5.4",
+    "vite": "^4.0.3"
   }
 }
