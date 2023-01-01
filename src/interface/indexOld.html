@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="stylesheet" href="stylesOld.css" />
+    <title>Dune Test Server Interface</title>
+		<script src="js/neutralino.js"></script>
+    <script defer src="js/main.js" type="module"></script>
+  </head>
+  <body>
+    <div id="dune-server-interface">
+      <div class="container">
+        <h2>Dune Server Alpha</h2>
+        <h3>Dev Interface <span id="version"></span></h3>
+      </div>
+      <div id="controls" class="container">
+				<div class="control">
+					<button id="start-server" class="menu-button">Start Server</button>
+					<input id="server-port" class="menu-input" placeholder="port" />
+				</div>
+				<div class="control">
+					<button id="kill-server" class="menu-button">Kill Server</button>
+				</div>
+				<div class="control">
+					<button id="echo-server" class="menu-button">Echo Server</button>
+					<input id="echo-text" class="menu-input" placeholder="...text" />
+				</div>
+      </div>
+			<div class="container">
+				<h3>Server status</h3>
+				<div id="server-log">
+					<div id="log-content"></div>
+					<div id="log-input">
+						<div class="input-marker">></div>
+						<input type="text" id="log-text-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+					</div>
+				</div>
+			</div>
+    </div>
+  </body>
+</html>

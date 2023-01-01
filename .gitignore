@@ -1,7 +1,7 @@
 # Developer tools' files
 .lite_workspace.lua
 
-# Neutralinojs binaries and builds
+# Build & packages
 /bin
 /dist
 /node_modules
@@ -10,10 +10,13 @@ tsconfig.json
 /package
 /.tmp
 .eslint*.*
-
-# Neutralinojs client (minified)
-neutralino.js
+**/*.log
 
 # Neutralinojs related files
 .storage
-*.log
+
+# environment settings
+*.env
+
+#test and other
+/test

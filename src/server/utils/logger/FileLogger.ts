@@ -1,5 +1,9 @@
 import { open } from "fs/promises";
 import { FileHandle } from "fs/promises";
+import { PathTo } from "../../app/PathHelper.js";
+import { EnvironmentKeys } from "../../config/EnvironmentKeyTypes.js";
+import { Helpers } from "../Helpers.js";
+import { LogLevel } from "./ServerLogger.js";
 
 enum LogStates {
 	INIT	= 'init',
@@ -16,25 +20,43 @@ enum LogTypes {
 	DEBUG	= 'DEBUG'
 }
 
-export class Logger {
+export type FileLoggerConfig = {
+	name: string,
+	logName: string,
+	autoInitialise: boolean,
+}
+
+// TODO: handle errors properly
+// TODO: append timestamp to log name and clear out old ones
+
+export class FileLoggingService {
 
 	#log: FileHandle|null = null;
 	#logState:LogStates = LogStates.INIT;
+
+	#logFolder = './';
+	#logName = 'cunt.log';
 
 	#logQueue:string[] = [];
 
 	name: string;
 	#debug = true;
 
-	constructor(loggerName: string) {
-		this.name = loggerName;
+	constructor(loggerConfig: FileLoggerConfig) {
+		this.name = loggerConfig.name;
+		this.#logName = loggerConfig.logName || this.#logName;
+		this.#logFolder = path(PathTo.LOGS);
+		if (loggerConfig.autoInitialise) this.init();
 	}
 
-	async #findOrCreateLogFile(filename = 'cunt.log'): Promise<void> {
+	get logPath() { return `${this.#logFolder}${this.#logName}` }
+
+	async #findOrCreateLogFile(): Promise<void> {
 		if (this.#log) throw new Error(`Log has already been initialised`);
-		this.#log = await open(`./${filename}`, 'a+')
+		this.#log = await open(`${this.logPath}`, 'a+')
 			.catch(err => { throw err; });
 		this.#logState = LogStates.IDLE;
+		if (this.#logQueue.length) this.#processQueue();
 	}
 
 	async #processQueue(): Promise<void> {
@@ -48,7 +70,7 @@ export class Logger {
 	}
 
 	async #writeLog(msg: string, logType: LogTypes): Promise<void> {
-		if ([ LogStates.ERROR, LogStates.INIT ].includes(this.#logState)) throw new Error('FUCK');
+		if ([ LogStates.ERROR ].includes(this.#logState)) throw new Error('FUCK');
 		const timestamp = new Date(Date.now()).toLocaleString(),
 			message = `[${timestamp}] ${this.name}.${logType} - ${msg}\n`;
 		this.#logQueue.push(message);
@@ -71,6 +93,13 @@ export class Logger {
 	async debug(msg: string): Promise<void> {
 		if (!this.#debug) return;
 		this.#writeLog(msg, LogTypes.DEBUG);
+	}
+
+	async writeToLogFile(logLevel: LogLevel, messages: any[]) {
+		if (!this[logLevel]) return;
+		messages.forEach(msg => {
+			this[logLevel](Helpers.stringifyMixed(msg));
+		});
 	}
 
 }
