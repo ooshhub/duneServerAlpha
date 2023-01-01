@@ -17,3 +17,6 @@ tsconfig.json
 
 # environment settings
 *.env
+
+#test and other
+./test
