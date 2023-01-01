@@ -2,8 +2,8 @@
   "applicationId": "dune.server.interface.alpha",
   "version": "0.1.0",
   "defaultMode": "window",
-  "port": 0,
-  "documentRoot": "/src/interface/",
+  "port": 3333,
+  "documentRoot": "/build/interface",
   "url": "/",
   "enableServer": true,
   "enableNativeAPI": true,
@@ -18,16 +18,7 @@
     "debug.log"
   ],
   "globalVariables": {
-    "TEST1": "Hello",
-    "TEST2": [
-      2,
-      4,
-      5
-    ],
-    "TEST3": {
-      "value1": 10,
-      "value2": {}
-    }
+
   },
   "modes": {
     "window": {
@@ -71,8 +62,8 @@
     }
   },
   "cli": {
-    "binaryName": "duneServerAlpha",
-    "resourcesPath": "/src/interface/",
+    "binaryName": "duneServerInterface",
+    "resourcesPath": "/build/interface/",
     "extensionsPath": "/src/extensions/",
     "clientLibrary": "/src/interface/js/neutralino.js",
     "binaryVersion": "4.7.0",

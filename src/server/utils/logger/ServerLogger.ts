@@ -3,7 +3,7 @@
 import { ERROR } from "../../errors/errors.js";
 import { ConsoleLoggingContract } from "../../serviceProviderRegistry/contracts/ConsoleLoggingContract.js";
 import { ServerLoggerConfig, ServerLoggingContract } from "../../serviceProviderRegistry/contracts/ServerLoggingContract.js";
-import { FileLoggingService } from "./FileLogger.js";
+import { FileLoggerConfig, FileLoggingService } from "./FileLogger.js";
 import { InterfaceMessagingService } from "../../io/InterfaceMessagingService.js";
 
 export enum LogLevel {
@@ -24,7 +24,10 @@ export enum LogType {
 }
 
 const defaultLoggers = {
-	fileLogger: new FileLoggingService({ name: 'FileLogger', logName: 'cunt.log', autoInitialise: true }),
+	fileLogger: {
+		provider: FileLoggingService,
+		constructorArguments: [ { name: 'FileLogger', logName: 'cunt.log', autoInitialise: true } ] as [FileLoggerConfig],
+	},
 	consoleLogger: console
 }
 
@@ -37,7 +40,7 @@ export class ServerLogger implements ServerLoggingContract {
 	#consoleLogger: ConsoleLoggingContract;
 
 	constructor(serverLoggerConfig: ServerLoggerConfig) {
-		this.#fileLogger = serverLoggerConfig.fileLogger ?? defaultLoggers.fileLogger;
+		this.#fileLogger = new defaultLoggers.fileLogger.provider(...defaultLoggers.fileLogger.constructorArguments);
 		this.#consoleLogger = serverLoggerConfig.consoleLoggger ?? defaultLoggers.consoleLogger;
 		if (ServerLogger.instance) {
 			console.warn(ERROR.ONLY_ONE_INSTANCE_ALLOWED, [ this.constructor.name ]);

@@ -1,3 +1,4 @@
+import { mkdir } from "fs";
 import { EnvironmentKeys } from "../config/EnvironmentKeyTypes.js";
 import { DuneError } from "../errors/DuneError.js";
 import { ERROR } from "../errors/errors.js";
@@ -25,6 +26,17 @@ export class PathHelper {
 		// Attach global helpers
 		global.path = PathHelper.getPath;
 
+		// Check if paths exist
+		PathHelper.#findOrCreatePaths();
+	}
+
+	static #findOrCreatePaths() {
+		Object.values(PathTo).forEach((shortcut) => {
+			const path = PathHelper.getPath(shortcut);
+			mkdir(path, { recursive: true }, (err) => {
+				if (err) throw new DuneError(ERROR.COULD_NOT_CREATE_FOLDER, [ path ]);
+			});
+		});
 	}
 
 	static #resolveShortcut(shortcut: string): string {

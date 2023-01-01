@@ -1,5 +1,7 @@
 import { open } from "fs/promises";
 import { FileHandle } from "fs/promises";
+import { PathTo } from "../../app/PathHelper.js";
+import { EnvironmentKeys } from "../../config/EnvironmentKeyTypes.js";
 import { Helpers } from "../Helpers.js";
 import { LogLevel } from "./ServerLogger.js";
 
@@ -32,6 +34,7 @@ export class FileLoggingService {
 	#log: FileHandle|null = null;
 	#logState:LogStates = LogStates.INIT;
 
+	#logFolder = './';
 	#logName = 'cunt.log';
 
 	#logQueue:string[] = [];
@@ -42,12 +45,15 @@ export class FileLoggingService {
 	constructor(loggerConfig: FileLoggerConfig) {
 		this.name = loggerConfig.name;
 		this.#logName = loggerConfig.logName || this.#logName;
+		this.#logFolder = path(PathTo.LOGS);
 		if (loggerConfig.autoInitialise) this.init();
 	}
 
+	get logPath() { return `${this.#logFolder}${this.#logName}` }
+
 	async #findOrCreateLogFile(): Promise<void> {
 		if (this.#log) throw new Error(`Log has already been initialised`);
-		this.#log = await open(`./${this.#logName}`, 'a+')
+		this.#log = await open(`${this.logPath}`, 'a+')
 			.catch(err => { throw err; });
 		this.#logState = LogStates.IDLE;
 		if (this.#logQueue.length) this.#processQueue();
