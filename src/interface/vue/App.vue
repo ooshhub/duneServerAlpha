@@ -1,27 +1,17 @@
 <script setup>
+	import ControlPanel from './components/ControlPanel.vue';
+	import ServerConsole from './components/ServerConsole.vue';
+
+	
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      Blah
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      Blah
-    </a>
-  </div>
+	<div class="text-center font-mono text-[18px] h-full bg-deadspace">
+		<div class="bg-main-bg w-[95%] py-4 my-4 border-main-border border-[1px] rounded mx-auto">
+			<h1 class="text-2xl">Dune Server Alpha</h1>
+			<h1 class="text-lg">Dev Interface <span id="version"></span></h1>
+		</div>
+		<ControlPanel class="mx-auto grid grid-cols-2 items-center justify-between bg-main-bg w-[95%] py-4 my-4 border-main-border border-[1px] rounded" />
+		<ServerConsole class="bg-main-bg w-[95%] py-4 my-4 border-main-border border-[1px] rounded mx-auto" />
+	</div>
 </template>
-
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
