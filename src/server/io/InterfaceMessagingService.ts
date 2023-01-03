@@ -4,22 +4,22 @@ import { Helpers } from "../utils/Helpers.js";
 import { LogLevel } from "../utils/logger/ServerLogger.js";
 
 enum InterfaceLogMarkers {
-	log = '%LOG%',
-	info = '%INFO%',
-	warn = '%WARN%',
-	error = '%ERROR'
+	log = 'LOG',
+	info = 'INFO',
+	warn = 'WARN',
+	error = 'ERROR',
 }
 
 export enum InterfaceMessageType {
 	COMMAND = 'COMMAND'
 }
 
-const RX_SERVER_COMMAND = /%COMMAND:(\w+)%/
-
 export class InterfaceMessagingService implements StdIoMessagingContract {
 
 	#commandObservers: GenericFunction[] = [];
 	#stdInInterface;
+
+	#rxServerCommand = /^%[\w_-]+%/;
 
 	constructor(messengerConfig: StdIoMessengerConfig) {
 		this.#stdInInterface = readLine.createInterface({
@@ -29,9 +29,8 @@ export class InterfaceMessagingService implements StdIoMessagingContract {
 		if (messengerConfig.autoInitialiseListeners) this.initialiseListeners();
 	}
 
-	#isCommand(inputLine: string): string|null {
-		const commandMatch = inputLine.match(RX_SERVER_COMMAND);
-		return commandMatch?.[1] ?? null;
+	#isCommand(inputLine: string): boolean {
+		return this.#rxServerCommand.test(inputLine);
 	}
 
 	initialiseListeners() {
@@ -44,10 +43,12 @@ export class InterfaceMessagingService implements StdIoMessagingContract {
 		});
 	}
 
+	// Send a message for the ServerInterface to log to the UI
+	// Currently doesn't implement log levels
 	async sendLogToInterface(logLevel: LogLevel, messages: any[]): Promise<void> {
 		if (!InterfaceLogMarkers[logLevel]) return;
 		messages.forEach(msg => {
-			const sendString = `${InterfaceLogMarkers[logLevel]}${Helpers.stringifyMixed(msg)}`;
+			const sendString = `%INTERFACE%${Helpers.stringifyMixed(msg)}\n`;
 			process.stdout.write(sendString);
 		});
 	}

@@ -13,7 +13,5 @@ export interface StdIoMessagingContract {
 
 	sendLogToInterface: (logLevel: LogLevel, messages: any[]) => Promise<void>;
 	
-	// processStdInCommand: (handler: (command: StdInCommands, ...args: []) => void) => void;
-
 	addObserver(observer: GenericFunction, messageType: InterfaceMessageType): boolean
 }

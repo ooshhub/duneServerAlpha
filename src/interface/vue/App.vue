@@ -1,8 +1,85 @@
 <script setup>
 	import ControlPanel from './components/ControlPanel.vue';
 	import ServerConsole from './components/ServerConsole.vue';
+	import { ServerInterface } from '../js/ServerInterface.js';
+	import { ref } from 'vue';
+	import { StdIoEventMapping } from '../../server/events/mapping/StdIoEventMapping.js';
 
-	
+	const serverObserver = (interfaceEvent) => {
+		const { eventName, eventData } = interfaceEvent;
+		switch(eventName) {
+			case(StdIoEventMapping.LOGGING.INTERFACE): {
+				sendToInterfaceLog(eventData);
+				break;
+			}
+			case('EXIT'): {
+				data.serverOnline = false;
+				sendToInterfaceLog({ message: 'The server has closed unexpectedly.' });
+				break;
+			}
+			case(StdIoEventMapping.UPDATES.UPDATE_ERROR): {
+				console.error(eventData);
+				sendToInterfaceLog({ message: 'Server error logged to console.' });
+				break;
+			}
+			case(StdIoEventMapping.REQUESTS.RESPONSE_RESTART): {
+				// TODO: handle restart complete
+				console.log('handle restart event');
+				break;
+			}
+			case(StdIoEventMapping.REQUESTS.RESPONSE_STATUS || StdIoEventMapping.UPDATES.UPDATE_STATUS): {
+				console.log('Status updated recceived');
+				break;
+			}
+			case(StdIoEventMapping.REQUESTS.RESPONSE_CLIENTS || StdIoEventMapping.UPDATES.UPDATE_CLIENTS): {
+				console.log('Client update recieved');
+				break;
+			}
+			default: {
+				console.warn(`Unknown event sent by ServerInterface: "${eventName}"`);
+			}
+		}
+	}
+
+	const serverInterface = new ServerInterface({
+		serverFilePath: './build/server/main.js',
+		observer: serverObserver
+	});
+
+	const data = {
+		serverOnline: ref(false),
+	}
+
+	const startServer = async (portNumber) => {
+		await serverInterface.spawnServer(portNumber).catch(err => {
+			alert('There was an error starting the server');
+			console.error(err);
+		}).finally(() => {
+			data.serverOnline.value = serverInterface.online;
+		});
+		console.log(data.serverOnline.value);
+	}
+
+	const restartServer = async () => {
+		return false;
+	}
+
+	const killServer = async () => {
+		return false;
+	}
+
+	const echoServer = async (message) => {
+		serverInterface.sendRequestToServer('REQUEST_ECHO', message);
+	}
+
+	const interfaceLog = ref(null);
+
+	const sendToInterfaceLog = (message) => {
+		console.info('Sending message to interface console');
+		if (interfaceLog.value) interfaceLog.value.receiveServerMessage(message);
+	}
+
+
 </script>
 
 <template>
@@ -11,7 +88,17 @@
 			<h1 class="text-2xl">Dune Server Alpha</h1>
 			<h1 class="text-lg">Dev Interface <span id="version"></span></h1>
 		</div>
-		<ControlPanel class="mx-auto grid grid-cols-2 items-center justify-between bg-main-bg w-[95%] py-4 my-4 border-main-border border-[1px] rounded" />
-		<ServerConsole class="bg-main-bg w-[95%] py-4 my-4 border-main-border border-[1px] rounded mx-auto" />
+		<ControlPanel 
+			class="mx-auto grid grid-cols-2 items-center justify-between bg-main-bg w-[95%] py-4 my-4 border-main-border border-[1px] rounded"
+			:server-online="data.serverOnline.value"
+			@start-server="startServer"
+			@restart-server="restartServer"
+			@kill-server="killServer"
+			@echo-server="echoServer"
+		/>
+		<ServerConsole ref="interfaceLog"
+			class="bg-main-bg w-[95%] py-4 my-4 border-main-border border-[1px] rounded mx-auto" 
+
+		/>
 	</div>
 </template>

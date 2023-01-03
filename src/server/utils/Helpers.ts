@@ -4,6 +4,13 @@ import { ERROR } from "../errors/errors.js";
 export class Helpers {
 	constructor() { throw new DuneError(ERROR.NO_INSTANTIATION, [ this.constructor.name ]) }
 
+	static safeJsonify(inputString: string): GenericJson|null {
+		let output = null;
+		try { output = JSON.parse(inputString) }
+		catch(e) { /* */ }
+		return output;
+	}
+
 	/**
 	 * @param inp 
 	 * @returns 

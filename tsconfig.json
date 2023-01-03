@@ -4,18 +4,20 @@
 	],
 	"include": [
 		"./src/server/**/*",
-		"./src/types/**/*"
+		"src/@types/**/*",
+		"src/@types/global.d.ts",
 	],
 	"compilerOptions": {
-		"typeRoots": [ "/src/types" ],
+		"typeRoots": [ "/src/@types" ],
 		"rootDir": "./src/server",
 		"outDir": "build/server",
 		"target": "ES2019",
-		"module": "CommonJS",
+		"module": "ES2020",
 		"moduleResolution": "node",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"types": ["node"],
 		"strict": true,
+		"allowJs": true,
 	},
 }

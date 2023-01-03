@@ -1,4 +1,13 @@
 <script setup>
+
+const receiveServerMessage = (messageString) => {
+	//
+}
+
+defineExpose({
+	receiveServerMessage
+});
+
 </script>
 
 <template>

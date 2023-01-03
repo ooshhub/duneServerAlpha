@@ -1,7 +1,7 @@
 {
   "applicationId": "dune.server.interface.alpha",
   "version": "0.1.0",
-  "defaultMode": "window",
+  "defaultMode": "browser",
   "port": 3333,
   "documentRoot": "/src/interface",
   "url": "/",

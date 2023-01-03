@@ -15,10 +15,8 @@ dotenv.config({
 	path: `./${process.env.NODE_ENV}.env`,
 });
 ConfigManager.boot();
-console.log('config booted');
 
 const environment = env(EnvironmentKeys.ENVIRONMENT);
-console.log(environment);
 
 // Start Path helper
 const basePath = environment === 'production'
@@ -26,16 +24,12 @@ const basePath = environment === 'production'
 	: process.argv[1].replace(/[^/\\]+$/, '');
 PathHelper.boot(basePath);
 
-console.log('path booted');
-
 // Register core service providers and server supervisor
 const serviceRegistry = new ServiceProviderRegistry();
 const serverSupervisor = new ServerSupervisor({
 	interfaceMessagingService: serviceRegistry.stdIoMessaging,
 	playerLinkService: serviceRegistry.playerLinkProvider,
 });
-
-console.log('service providers registered');
 
 // Start Event Dispatcher
 const eventDispatcher = new DuneEventDispatcher({
@@ -46,9 +40,9 @@ const eventDispatcher = new DuneEventDispatcher({
 global.dispatch = eventDispatcher.dispatchEvent;
 global.request = eventDispatcher.dispatchRequest;
 
-console.log('event dispatcher created');
-
-logger.warn(LogType.CFI, `You're a cunt.`);
+logger.info(env(EnvironmentKeys.ENVIRONMENT));
+logger.info(LogType.CFI, `You're a cunt.`);
+logger.warn(LogType.CI, `Poos`);
 
 // initialise socketserver on request from stdin
 
