@@ -1,7 +1,7 @@
 import { DuneError } from "../errors/DuneError.js";
 import { ERROR } from "../errors/errors.js";
-import { Helpers } from "../utils/Helpers.js";
 import { StdIoEventMapping } from "../events/mapping/StdIoEventMapping.js";
+import { Helpers } from "../utils/Helpers.js";
 
 export const RX_STD_IN_COMMAND = /^%([\w_-]+)%\s*/;
 
@@ -21,10 +21,12 @@ export class InterfaceMessagingInterpreter {
 		}
 		else {
 			const requestContents = stdInString.replace(RX_STD_IN_COMMAND, '');
+			const data = Helpers.safeJsonify(requestContents) ?? {};
+			logger.info(data, 'dfg');
 			// TODO: handle expected arg keys if required
 			return {
 				requestName: command,
-				requestData: Helpers.safeJsonify(requestContents) ?? {},
+				requestData: data,
 			};
 		}
 	}

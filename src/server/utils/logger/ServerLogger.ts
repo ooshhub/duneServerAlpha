@@ -106,9 +106,9 @@ export class ServerLogger implements ServerLoggingContract {
 		if (targets.includes('interface')) this.#logToInterface(logLevel, messages);	
 	}
 
-	log(...args: any[]): void { this.#createLog(LogLevel.LOG, ...args); }
-	info(...args: any[]): void { this.#createLog(LogLevel.INFO, ...args); }
-	warn(...args: any[]): void { this.#createLog(LogLevel.WARN, ...args); }
-	error(...args: any[]): void { this.#createLog(LogLevel.ERROR, ...args); }
+	log(...args: any[]): void { this.#createLog(LogLevel.LOG, args); }
+	info(...args: any[]): void { this.#createLog(LogLevel.INFO, args); }
+	warn(...args: any[]): void { this.#createLog(LogLevel.WARN, args); }
+	error(...args: any[]): void { this.#createLog(LogLevel.ERROR, args); }
 
 }

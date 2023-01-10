@@ -12,6 +12,10 @@
 				sendToInterfaceLog(eventData);
 				break;
 			}
+			case(StdIoEventMapping.REQUESTS.REQUEST_ECHO): {
+				sendToInterfaceLog(eventData);
+				break;
+			}
 			case('EXIT'): {
 				data.serverOnline = false;
 				sendToInterfaceLog({ message: 'The server has closed unexpectedly.' });
@@ -51,6 +55,7 @@
 	}
 
 	const startServer = async (portNumber) => {
+		console.log('Starting server...');
 		await serverInterface.spawnServer(portNumber).catch(err => {
 			alert('There was an error starting the server');
 			console.error(err);
@@ -75,8 +80,12 @@
 	const interfaceLog = ref(null);
 
 	const sendToInterfaceLog = (message) => {
-		console.info('Sending message to interface console');
-		if (interfaceLog.value) interfaceLog.value.receiveServerMessage(message);
+		// console.info('Sending message to interface console');
+		if (interfaceLog.value) interfaceLog.value.receiveServerMessage(message.data);
+	}
+
+	const sendServerCommand = (commandString, commandData) => {
+		serverInterface.sendRequestToServer(commandString, commandData);
 	}
 
 
@@ -98,7 +107,7 @@
 		/>
 		<ServerConsole ref="interfaceLog"
 			class="bg-main-bg w-[95%] py-4 my-4 border-main-border border-[1px] rounded mx-auto" 
-
+			@emit-command="(...args) => sendServerCommand(...args)"
 		/>
 	</div>
 </template>

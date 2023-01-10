@@ -34,7 +34,10 @@ export class ServerSupervisor {
 	#handleInterfaceCommand(interfaceCommand: string): void {
 		const request = this.#interfaceRequestInterpreter.transformRequest(interfaceCommand);
 		if (request) {
-			logger.info(`Interface request received: ${request.requestName}`);
+			logger.info(`Interface request received: ${request.requestName}`, request.requestData);
+			if (request.requestName.indexOf('REQUEST_ECHO') > -1) {
+				process.stdout.write(`%RESPONSE_ECHO%${request.requestData.data}`);
+			}
 		}	
 	}
 

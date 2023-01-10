@@ -34,13 +34,14 @@ export class ServerCommandInterpreter {
   // Inspect a server message and send back an Event
   // Console logging events go straight to consoleLogger
   transformStdOut(stdOutMessage) {
+    console.log(stdOutMessage);
     const [ , serverMessageKey, logLevel ] = (stdOutMessage.match(this.rxMarker) ?? []),
       serverMessageContents = stdOutMessage.replace(this.rxMarker, '');
-    if (serverMessageKey && serverMessageKey in this.#serverKeyMap) {
+    if (serverMessageKey && Object.values(this.#serverKeyMap).includes(serverMessageKey)) {
       if (serverMessageKey === StdIoEventMapping.LOGGING.CONSOLE) this.#consoleLogger(logLevel.toLowerCase(), stdOutMessage);
       else {
         return new InterfaceEvent({
-          eventName: this.#serverKeyMap[serverMessageKey],
+          eventName: serverMessageKey,
           eventData: this.#jsonify(serverMessageContents) ?? { data: serverMessageContents }
         });
       }
@@ -71,11 +72,12 @@ export class ServerCommandInterpreter {
    * @param {object} requestData 
    * @returns {void}
    */
-  buildServerCommand(commandString  = '', requestData = {}) {
+  buildServerCommand(commandString = '', requestData = {}) {
     commandString = commandString.toUpperCase();
     if (this.#serverRequestKeys.includes(commandString)) {
-      const requestDataString = JSON.stringify(requestData) ?? '';
-      return `%${commandString}%${requestDataString}`;
+      const requestDataString = JSON.stringify(requestData) ?? '',
+        fullRequestString = `%${commandString}%${requestDataString}`;
+      return fullRequestString
     }
     else console.warn(`Bad server command: "${commandString}"`);
   }

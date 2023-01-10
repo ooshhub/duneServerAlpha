@@ -1,6 +1,6 @@
 <script setup>
 	import { ref } from 'vue';
-import ControlButton from './ControlButton.vue';
+	import ControlButton from './ControlButton.vue';
 	import ControlInput from './ControlInput.vue';
 
 	const props = defineProps({
