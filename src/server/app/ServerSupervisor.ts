@@ -1,9 +1,13 @@
+import { ConfigKeys } from "../config/ConfigKeyTypes.js";
 import { DuneError } from "../errors/DuneError.js";
 import { ERROR } from "../errors/errors.js";
+import { StdIoEventMapping } from "../events/mapping/StdIoEventMapping.js";
 import { InterfaceMessagingInterpreter } from "../io/InterfaceMessagingInterpreter.js";
 import { InterfaceMessageType } from "../io/InterfaceMessagingService.js";
 import { PlayerLinkContract } from "../serviceProviderRegistry/contracts/PlayerLinkContract.js";
 import { StdIoMessagingContract } from "../serviceProviderRegistry/contracts/StdIoMessagingContract.js";
+import { LogType } from "../utils/logger/ServerLogger.js";
+import { CommandLineOptionCollection } from "./ConfigManager.js";
 
 export type ServerSupervisorConfig = {
 	interfaceMessagingService: StdIoMessagingContract,
@@ -32,13 +36,48 @@ export class ServerSupervisor {
 	}
 
 	#handleInterfaceCommand(interfaceCommand: string): void {
-		const request = this.#interfaceRequestInterpreter.transformRequest(interfaceCommand);
-		if (request) {
-			logger.info(`Interface request received: ${request.requestName}`, request.requestData);
-			if (request.requestName.indexOf('REQUEST_ECHO') > -1) {
-				process.stdout.write(`%RESPONSE_ECHO%${request.requestData.data}`);
+		const { requestName, requestData } = this.#interfaceRequestInterpreter.transformRequest(interfaceCommand);
+		if (requestName) {
+			logger.info(`Interface request received: ${requestName}`, requestData);
+			switch(requestName) {
+				case('REQUEST_RESTART'): {
+					this.#handleRestart(requestData);
+					break;
+				}
+				case('REQUEST_ECHO'): {
+					this.#handleEcho(requestData);
+					break;
+				}
+				default: {
+					logger.warn(LogType.I, `Unknown request received by ${this.constructor.name}: "${requestName}"`);
+				}
 			}
 		}	
+	}
+
+	#handleRestart(requestData: GenericJson): void {
+		// handle restart
+	}
+
+	#handleEcho(requestData: GenericJson): void {
+		const responseString = this.#interfaceRequestInterpreter.transformResponse({
+			responseName: StdIoEventMapping.REQUESTS.REQUEST_ECHO,
+			responseData: requestData.data
+		});
+		this.#interfaceMessaging.sendRawToInterface(responseString);
+	}
+
+	// TODO: Processing Config keys should be done in ConfigManager - just the restart stuff here
+	processCommandLineOptions(commandLineOptions: CommandLineOptionCollection): void {
+		commandLineOptions.forEach(option => {
+			const [ key, value ] = Object.entries(option)[0];
+			switch(`${key}`) {
+				case (ConfigKeys.PORT): {
+					config(ConfigKeys.PORT, value);
+					break;
+				}
+			}
+		});
 	}
 
 }

@@ -1,9 +1,13 @@
 import { ConfigKeyCollection, KeyTypes } from "./EnvironmentKeyTypes.js";
 
+export enum ConfigKeys {
+	PORT			= 'PORT',
+}
+
 // Writeable config keys
 export const ConfigKeyTypes: ConfigKeyCollection = {
-	testKey: {
-		keyType: KeyTypes.STRING,
-		default: 'production',
+	[ConfigKeys.PORT]: {
+		keyType: KeyTypes.NUMBER,
+		default: 3333,
 	},
 }

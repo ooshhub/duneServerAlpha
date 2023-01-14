@@ -50,6 +50,7 @@ export class ServerCommandInterpreter {
   }
 
   transformStdErr(stdErrMessage) {
+    console.log(stdErrMessage);
     const [ , serverMessageMarker, logLevel ] = (stdErrMessage.match(this.rxMarker) ?? []);
     // Handle a warning or error generated intentionally for logging
     if (serverMessageMarker === 'CONSOLE') {

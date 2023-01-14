@@ -13,17 +13,18 @@
 				break;
 			}
 			case(StdIoEventMapping.REQUESTS.REQUEST_ECHO): {
+				console.warn(eventData);
 				sendToInterfaceLog(eventData);
 				break;
 			}
 			case('EXIT'): {
 				data.serverOnline = false;
-				sendToInterfaceLog({ message: 'The server has closed unexpectedly.' });
+				sendToInterfaceLog({ data: 'The server has closed unexpectedly.' });
 				break;
 			}
 			case(StdIoEventMapping.UPDATES.UPDATE_ERROR): {
 				console.error(eventData);
-				sendToInterfaceLog({ message: 'Server error logged to console.' });
+				sendToInterfaceLog({ data: 'Server error logged to console.' });
 				break;
 			}
 			case(StdIoEventMapping.REQUESTS.RESPONSE_RESTART): {
@@ -62,7 +63,6 @@
 		}).finally(() => {
 			data.serverOnline.value = serverInterface.online;
 		});
-		console.log(data.serverOnline.value);
 	}
 
 	const restartServer = async () => {

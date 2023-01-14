@@ -41,8 +41,9 @@ export class ServerInterface {
 		const { data } = detail
 			? detail
 			: null;
+    if (data && typeof(data) !== 'string') console.log(`Irregular data recieved by splitLines in ServerInterface.js`, data);
 		return data
-			? data.split(/\n/g).filter(v=>v)
+      ? data.split(/\n/g).filter(v=>v)
 			: [];
 	}
 

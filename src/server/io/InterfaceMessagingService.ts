@@ -53,6 +53,10 @@ export class InterfaceMessagingService implements StdIoMessagingContract {
 		});
 	}
 
+	async sendRawToInterface(outputString: string): Promise<void> {
+		process.stdout.write(`${outputString}\n`);
+	}
+
 	#getTargetObserverArray(messageType: InterfaceMessageType): GenericFunction[] | null {
 		return messageType === InterfaceMessageType.COMMAND
 			? this.#commandObservers

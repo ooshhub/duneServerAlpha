@@ -3,6 +3,7 @@ export enum KeyTypes {
 	FLOAT		= 'float',
 	STRING  = 'string',
 	BOOLEAN	= 'boolean',
+	NUMBER	= 'number',
 }
 
 export type ConfigValueTypes = number|string|boolean|null;
