@@ -4,7 +4,9 @@ import { ERROR } from "../../errors/errors.js";
 import { ConsoleLoggingContract } from "../../serviceProviderRegistry/contracts/ConsoleLoggingContract.js";
 import { ServerLoggerConfig, ServerLoggingContract } from "../../serviceProviderRegistry/contracts/ServerLoggingContract.js";
 import { FileLoggerConfig, FileLoggingService } from "./FileLogger.js";
-import { InterfaceMessagingService } from "../../io/InterfaceMessagingService.js";
+import { StdIoMessagingContract } from "../../serviceProviderRegistry/contracts/StdIoMessagingContract.js";
+import { ConsolePassthrough } from "./ConsolePassthrough.js";
+import { EnvironmentKeys } from "../../config/EnvironmentKeyTypes.js";
 
 export enum LogLevel {
 	LOG = 'log',
@@ -20,7 +22,7 @@ export enum LogType {
 	CF = 'console,file',
 	CI = 'console,interface',
 	FI = 'file,interface',
-	CFI = 'console,file,ui',
+	CFI = 'console,file,interface',
 }
 
 const defaultLoggers = {
@@ -28,7 +30,10 @@ const defaultLoggers = {
 		provider: FileLoggingService,
 		constructorArguments: [ { name: 'FileLogger', logName: 'cunt.log', autoInitialise: true } ] as [FileLoggerConfig],
 	},
-	consoleLogger: console
+	consoleLogger: {
+		provider: ConsolePassthrough,
+		constructorArguments: [] as [],
+	},
 }
 
 export class ServerLogger implements ServerLoggingContract {
@@ -36,12 +41,14 @@ export class ServerLogger implements ServerLoggingContract {
 	static instance: ServerLogger | undefined;
 
 	#fileLogger: FileLoggingService;
-	#interfaceMessaging?: InterfaceMessagingService;
+	#interfaceMessaging?: StdIoMessagingContract;
 	#consoleLogger: ConsoleLoggingContract;
 
 	constructor(serverLoggerConfig: ServerLoggerConfig) {
 		this.#fileLogger = new defaultLoggers.fileLogger.provider(...defaultLoggers.fileLogger.constructorArguments);
-		this.#consoleLogger = serverLoggerConfig.consoleLoggger ?? defaultLoggers.consoleLogger;
+		this.#consoleLogger = env(EnvironmentKeys.ENVIRONMENT) !== 'production'
+			? serverLoggerConfig.consoleLogger ?? new defaultLoggers.consoleLogger.provider(...defaultLoggers.consoleLogger.constructorArguments)
+			: console;
 		if (ServerLogger.instance) {
 			console.warn(ERROR.ONLY_ONE_INSTANCE_ALLOWED, [ this.constructor.name ]);
 			return ServerLogger.instance;
@@ -49,7 +56,7 @@ export class ServerLogger implements ServerLoggingContract {
 		ServerLogger.instance = this;
 	}
 
-	registerInterfaceLogger(interfaceLogger: InterfaceMessagingService): void {
+	registerInterfaceLogger(interfaceLogger: StdIoMessagingContract): void {
 		this.#interfaceMessaging = interfaceLogger;
 	}
 
@@ -60,7 +67,6 @@ export class ServerLogger implements ServerLoggingContract {
 	registerFileLogger(fileLogger: FileLoggingService): void {
 		this.#fileLogger = fileLogger;
 	}
-
 
 	#logToConsole(logLevel: LogLevel, messages: any[]): void {
 		if (this.#consoleLogger[logLevel]) this.#consoleLogger[logLevel](...messages);
@@ -100,9 +106,9 @@ export class ServerLogger implements ServerLoggingContract {
 		if (targets.includes('interface')) this.#logToInterface(logLevel, messages);	
 	}
 
-	log(...args: any[]): void { this.#createLog(LogLevel.LOG, ...args); }
-	info(...args: any[]): void { this.#createLog(LogLevel.INFO, ...args); }
-	warn(...args: any[]): void { this.#createLog(LogLevel.WARN, ...args); }
-	error(...args: any[]): void { this.#createLog(LogLevel.ERROR, ...args); }
+	log(...args: any[]): void { this.#createLog(LogLevel.LOG, args); }
+	info(...args: any[]): void { this.#createLog(LogLevel.INFO, args); }
+	warn(...args: any[]): void { this.#createLog(LogLevel.WARN, args); }
+	error(...args: any[]): void { this.#createLog(LogLevel.ERROR, args); }
 
 }

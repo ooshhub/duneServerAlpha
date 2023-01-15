@@ -1,104 +1,125 @@
 /* globals Neutralino */
 
-export const COMMANDS = {
-  ping: `%PING%`,
-  log:	`%LOG%`,
-  echo: `%ECHO%`,
-}
+import { InterfaceEvent } from "./InterfaceEvent.js";
+import { ServerCommandInterpreter } from "./ServerCommandInterpreter.js";
 
 export class ServerInterface {
 
-  #server = {};
-  #logger = null;
+	#server = {};
+	#interpreter;
+	#observer = null;
 
-  #serverPath = '';
+	#serverPath = '';
 
-  constructor(serverLogger, serverFIlePath) {
-    this.#logger = serverLogger;
-    this.#serverPath = serverFIlePath;
-    this.#startServerListeners();
+	constructor({ serverFilePath, observer }) {
+		this.#serverPath = serverFilePath;
+		this.#observer = observer;
+		this.#interpreter = new ServerCommandInterpreter();
+		this.#startServerListeners();
+	}
 
-  }
+	get online() { return !!this.#server.pid }
 
-  async #spawnServer() {
-    const existingProcesses = await Neutralino.os.getSpawnedProcesses();
-    if (existingProcesses.length) {
-      console.log(`Killing ${existingProcesses.length} current processes...`);
-      await this.destroyAllServers();
-      console.info(`Removed processes, server is: `, this.#server);
-    }
-    Object.assign(this.#server, await Neutralino.os.spawnProcess(`node ${this.#serverPath}`));
-  }
+	sendEvent(interfaceEvent) {
+		if (interfaceEvent.eventName) {
+			this.#observer(interfaceEvent);
+		}
+	}
 
-  #startServerListeners() {
-    Neutralino.events.on('spawnedProcess', (event) => {
-      if (this.#server.id === event.detail.id) {
-        switch(event.detail.action) {
-          case 'stdOut': {
-            this.#handleServerOut(event);
-            break;
-          }
-          case 'stdErr': {
-            this.#handleServerErr(event);
-            break;
-          }
-          case 'exit': {
-            this.#handleServerExit(event);
-            break
-          }
-          default: {
-            console.warn(`Unknown server event`, event);
-          }
-        }
-      }
-    });
-  }
-    
-  async #handleServerExit() {
-    this.destroyAllServers();
-    this.#logger.receivedStdOut(`Server was destroyed. You monster.`);
-  }
-  
-  async #handleServerOut(event) {
-    const msg = event.detail.data;
-    this.#logger.receivedStdOut(msg);
-  }
-  async #handleServerErr(event) {
-    console.info(event);
-  }
+	async spawnServer(port) {
+		const existingProcesses = await Neutralino.os.getSpawnedProcesses();
+		if (existingProcesses.length) {
+			console.log(`Killing ${existingProcesses.length} current processes...`);
+			await this.destroyAllServers();
+			console.info(`Removed processes, server is: `, this.#server);
+		}
+		Object.assign(this.#server, await Neutralino.os.spawnProcess(`node ${this.#serverPath} --PORT=${port}`));
+		return this.online;
+	}
 
-  async destroyAllServers(id) {
-    let destroyed = 0;
-    const ids = id
-      ? [ id ]
-      : Object.values(await Neutralino.os.getSpawnedProcesses()).map(v => v.id);
-    for (let i = 0; i < ids.length; i++) {
-      await Neutralino.os.updateSpawnedProcess(ids[i], 'exit');
-      destroyed++;
-    }
-    Object.assign(this.#server, { id: null, pid: null });
-    if (destroyed) this.#logger.receivedStdOut(`Server destroyed. You monster.`, true);
-  }
+	#splitLines({ detail }) {
+		const { data } = detail
+			? detail
+			: null;
+		return data
+			? data.split(/\n/g).filter(v=>v)
+			: [];
+	}
 
-  async sendMessageToServer(message, command) {
-    if (!this.#server) return false;
-    const commandString = command && COMMANDS[command] ? COMMANDS[command] : '';
-    let updated = true;
-    await Neutralino.os.updateSpawnedProcess(this.#server.id, 'stdIn', `${commandString}${message}\n`)
-      .catch(err => {
-        updated = false;
-        console.warn(err);
-      });
-    return updated;
-  }
+	#startServerListeners() {
+		Neutralino.events.on('spawnedProcess', (event) => {      
+			if (this.#server.id === event.detail.id) {
+				const messages = this.#splitLines(event);
+				messages.forEach(message => {
+					switch(event.detail.action) {
+						case 'stdOut': {
+							this.#handleServerOut(message);
+							break;
+						}
+						case 'stdErr': {
+							this.#handleServerErr(message);
+							break;
+						}
+						case 'exit': {
+							this.#handleServerExit(message);
+							break
+						}
+						default: {
+							console.warn(`Unknown server event`, event);
+						}
+					}
+				});
+			}
+		});
+	}
+		
+	async #handleServerExit() {
+		this.sendEvent(new InterfaceEvent({
+			eventName: 'EXIT',
+			eventData: {}
+		}));
+	}
+	
+	async #handleServerOut(stdOutString) {
+		const event = this.#interpreter.transformStdOut(stdOutString);
+		if (event) this.sendEvent(event);
+	}
+	async #handleServerErr(stdErrString) {
+		const event = this.#interpreter.transformStdErr(stdErrString);
+		if (event) this.sendEvent(event);
+	}
 
-  handleStartServerClick = () => {
-    this.#spawnServer();
-  }
+	async destroyAllServers(id) {
+		let destroyed = 0;
+		const ids = id
+			? [ id ]
+			: Object.values(await Neutralino.os.getSpawnedProcesses()).map(v => v.id);
+		for (let i = 0; i < ids.length; i++) {
+			await Neutralino.os.updateSpawnedProcess(ids[i], 'exit');
+			destroyed++;
+		}
+		Object.assign(this.#server, { id: null, pid: null });
+		if (destroyed) this.sendEvent('destroy', `Server destroyed. You monster.`);
+	}
 
-  echoServer = () => {
-    const echoInput = document.querySelector('#echo-text').value;
-    if (echoInput) this.sendMessageToServer(echoInput, 'echo');
-  }
+	async sendRequestToServer(request, requestData) {
+		const commandString = this.#interpreter.buildServerCommand(request, requestData);
+		let updated = true;
+		await Neutralino.os.updateSpawnedProcess(this.#server.id, 'stdIn', `${commandString}\n`)
+			.catch(err => {
+				updated = false;
+				console.warn(err);
+			});
+		return updated;
+	}
+
+	echoServer(echoString) {
+		this.sendCommandToServer('ECHO', echoString);
+	}
+
+	async restartServer() {
+		console.warn('Not yet implemented');
+		return false;
+	}
 
 }

@@ -2,7 +2,6 @@ export class ServerLog {
 
   #serverLogElement;
   #serverStatusMarker;
-	#serverMessageStyle ='background: purple; color: white; padding:1px 5px 1px 5px; border-radius: 3px; ';
 
   constructor(serverLogElement, serverStatusMarker) {
     this.#serverLogElement = serverLogElement;

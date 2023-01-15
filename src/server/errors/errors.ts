@@ -34,8 +34,10 @@ export const ERROR = {
 	CONFIG_ALREADY_BOOTED: `ConfigManager can only boot once, and has already been executed.`,
 	BAD_CONFIG_TYPE: `ConfigManager error setting key "%0" - value "%1" is not of type "%2".`,
 	CONFIG_KEY_NOT_FOUND: `ConfigManager error - config key "%0" not found.`,
-	
 
 	// File system
 	COULD_NOT_CREATE_FOLDER: `Could not create folder at "%0"`,
+
+	// Server GUI
+	BAD_STD_IN_REQUEST:	`Unknown process request: "%0"`
 }

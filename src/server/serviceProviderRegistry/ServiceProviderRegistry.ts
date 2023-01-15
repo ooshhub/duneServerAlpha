@@ -5,11 +5,10 @@ import { PlayerDirectoryService } from "../net/PlayerDirectoryService.js";
 import { SocketServer } from "../net/SocketServer.js";
 import { InterfaceMessagingService } from "../io/InterfaceMessagingService.js";
 import { ServerLogger } from "../utils/logger/ServerLogger.js";
-import { ConsoleLoggingContract } from "./contracts/ConsoleLoggingContract.js";
 import { LocalHubConfig, LocalHubContract } from "./contracts/LocalHubContract.js";
 import { PlayerLinkContract, SocketServerConfig } from "./contracts/PlayerLinkContract.js";
 import { StdIoMessagingContract, StdIoMessengerConfig } from "./contracts/StdIoMessagingContract.js";
-import { ServerLoggerConfig } from "./contracts/ServerLoggingContract.js";
+import { ServerLoggerConfig, ServerLoggingContract } from "./contracts/ServerLoggingContract.js";
 import { PlayerDirectoryServiceConfig, PlayerDirectoryServiceContract } from "./contracts/PlayerDirectoryServiceContract.js";
 
 type GenericClass<Type> = {
@@ -66,7 +65,7 @@ export class ServiceProviderRegistry {
 	#directoryService: PlayerDirectoryServiceContract;
 
 	// Secondary Providers
-	#loggingService: ConsoleLoggingContract
+	#loggingService: ServerLoggingContract;
 
 	constructor(
 		stdIoMessaging = defaultServiceProviders.stdIoMessaging,
@@ -83,6 +82,7 @@ export class ServiceProviderRegistry {
 		global.playerDirectory = this.#directoryService;
 
 		this.#stdIoMessaging = new stdIoMessaging.provider(...stdIoMessaging.constructorArguments);
+			this.#loggingService.registerInterfaceLogger(this.#stdIoMessaging);
 
 		this.#localHubService = new localHubService.provider(...(localHubService.constructorArguments));
 		this.#playerLinkService = new playerLinkService.provider(...playerLinkService.constructorArguments);

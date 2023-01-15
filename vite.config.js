@@ -10,7 +10,8 @@ export default defineConfig(({ command }) => {
     },
     plugins: [ vue() ],
     server: {
-      https: command === 'build' ? true : false
+      https: command === 'build' ? true : false,
+      port: 8888,
     }
   });
 });

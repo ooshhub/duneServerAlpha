@@ -17,10 +17,11 @@
   },
   "scripts": {
     "build:server": "tsc --build",
-    "watch:server": "tsc --watch",
+    "watch:server": "cross-env NODE_ENV=development tsc --watch",
     "dev:server": "cross-env NODE_ENV=development node ./build/server/main.js",
     "dev:ui": "vite",
-    "build:ui": "vite build",
+		"neu:ui": "cross-env NODE_ENV=development neu run --frontend-lib-dev",
+    "build:ui": "vite build && shx cp ./src/interface/js/neutralino.js ./build/interface/js",
     "package:server": "pkg . && echo Done!",
     "package:ui": "shx cp -r ./buildResources/bin ./ && cross-env NODE_ENV=production neu build && echo Moving files... && shx cp -r ./dist/* ./package && echo Cleaning up folders... && shx rm -r ./dist && shx rm -r ./bin && echo Done!"
   },
@@ -36,20 +37,23 @@
   "homepage": "https://github.com/ooshhub/duneServerAlpha#readme",
   "devDependencies": {
     "@types/node": "~18.11.9",
-    "@typescript-eslint/eslint-plugin": "~5.43.0",
-    "@typescript-eslint/parser": "~5.43.0",
+    "@typescript-eslint/eslint-plugin": "^5.47.1",
+    "@typescript-eslint/parser": "^5.47.1",
     "@vitejs/plugin-vue": "^4.0.0",
     "eslint": "~8.28.0",
+    "eslint-plugin-vue": "^9.8.0",
     "shx": "^0.3.4",
-    "tailwindcss": "~3.2.4",
+    "tailwindcss": "^3.2.4",
     "typescript": "~4.9.3",
     "vite": "^4.0.3",
     "vue": "~3.2.45"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.13",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "pkg": "^5.8.0",
+    "postcss": "^8.4.20",
     "socket.io": "~4.5.4"
   }
 }

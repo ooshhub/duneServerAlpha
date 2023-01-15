@@ -1,10 +1,10 @@
 import { FileLoggingService } from "../../utils/logger/FileLogger.js";
-import { InterfaceMessagingService } from "../../io/InterfaceMessagingService.js";
 import { ConsoleLoggingContract } from "./ConsoleLoggingContract.js";
+import { StdIoMessagingContract } from "./StdIoMessagingContract.js";
 
 export type ServerLoggerConfig = {
 	fileLogger?: FileLoggingService,
-	consoleLoggger?: ConsoleLoggingContract
+	consoleLogger?: ConsoleLoggingContract
 }
 
 export interface ServerLoggingContract {
@@ -13,7 +13,7 @@ export interface ServerLoggingContract {
 	warn: (...args: any[]) => void;
 	error: (...args: any[]) => void;
 
-	registerInterfaceLogger: (interfaceLogger: InterfaceMessagingService) => void;
+	registerInterfaceLogger: (interfaceLogger: StdIoMessagingContract) => void;
 
 	registerConsoleLogger: (consoleLogger: ConsoleLoggingContract) => void;
 
