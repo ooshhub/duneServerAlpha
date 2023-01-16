@@ -1,15 +1,16 @@
 import { InterfaceEvent } from "./InterfaceEvent.js";
-import { StdIoEventMapping } from "../../server/events/mapping/StdIoEventMapping";
+import { StdIoRequests, StdIoEvents, StdIoLogEvents, StdIoResponseMapping } from "../../server/events/mapping/StdIoEventMapping.js";
 
 export class ServerCommandInterpreter {
 
   rxMarker = /^%(\w+)-?(\w+)?%\s*/;
   #serverMessageStyle ='background: purple; color: white; padding:1px 5px 1px 5px; border-radius: 3px; ';
-  #serverRequestKeys = [ ...Object.keys(StdIoEventMapping.REQUESTS) ];
+  #serverRequestKeys = [ ...Object.keys(StdIoRequests) ];
+  #serverResponseKeys = [ ...Object.values(StdIoResponseMapping) ];
   #serverKeyMap = {
-    ...StdIoEventMapping.REQUESTS,
-    ...StdIoEventMapping.UPDATES,
-    ...StdIoEventMapping.LOGGING,
+    ...StdIoEvents,
+    ...StdIoLogEvents,
+    ...StdIoResponseMapping,
   }
 
   #jsonify(inputString) {
@@ -38,7 +39,7 @@ export class ServerCommandInterpreter {
     const [ , serverMessageKey, logLevel ] = (stdOutMessage.match(this.rxMarker) ?? []),
       serverMessageContents = stdOutMessage.replace(this.rxMarker, '');
     if (serverMessageKey && Object.values(this.#serverKeyMap).includes(serverMessageKey)) {
-      if (serverMessageKey === StdIoEventMapping.LOGGING.CONSOLE) this.#consoleLogger(logLevel.toLowerCase(), stdOutMessage);
+      if (serverMessageKey === StdIoLogEvents.CONSOLE) this.#consoleLogger(logLevel.toLowerCase(), stdOutMessage);
       else {
         return new InterfaceEvent({
           eventName: serverMessageKey,
@@ -61,7 +62,7 @@ export class ServerCommandInterpreter {
     else {
       const newError = this.#jsonify(stdErrMessage) ?? new Error(stdErrMessage);
       return new InterfaceEvent({
-        eventName: StdIoEventMapping.UPDATES.UPDATE_ERROR,
+        eventName: StdIoEvents.UPDATE_ERROR,
         eventData: newError
       });
     }

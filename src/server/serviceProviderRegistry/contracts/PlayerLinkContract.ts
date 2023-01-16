@@ -1,3 +1,4 @@
+import { DuneError } from "../../errors/DuneError.js";
 import { DuneServerEvent, DuneServerResponse } from "../../events/DuneServerEvent.js";
 import { DuneEventHandler, HostOptions, ServerOptions, SocketServerObserverType } from "../../net/SocketServer.js";
 
@@ -12,4 +13,6 @@ export interface PlayerLinkContract {
 	sendPlayerRequest: (duneServerEvent: DuneServerEvent, channel?: string) => Promise<DuneServerResponse[]>;
 	registerObserver: (observerType: SocketServerObserverType, handler: DuneEventHandler) => void;
 	removeObserver: (observerType: SocketServerObserverType, handler: DuneEventHandler) => void;
+
+	requestRestart: (secret: string) => Promise<string | DuneError>;
 }

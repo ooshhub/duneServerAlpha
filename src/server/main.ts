@@ -30,6 +30,8 @@ const serverSupervisor = new ServerSupervisor({
 	interfaceMessagingService: serviceRegistry.stdIoMessaging,
 	playerLinkService: serviceRegistry.playerLinkProvider,
 });
+
+logger.warn(process.argv);
 // Now ServerSupervisor needs to check the CLI options for server mode
 // e.g., did the server just do a forced restart and needs to restore some state?
 serverSupervisor.processCommandLineOptions(commandLineOptions);

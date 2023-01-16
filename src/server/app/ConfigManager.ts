@@ -53,7 +53,7 @@ export class ConfigManager {
 
 		// Assign command line arguments
 		const { validEnvironmentVariables,	commandLineOptions } = ProcessCommandLineInterface.processArguments(commandLineArguments);
-		Object.assign(newConfig, validEnvironmentVariables);
+		Object.assign(newConfig, ...validEnvironmentVariables);
 
 		this.#environmentConfig = newConfig;
 
@@ -160,7 +160,6 @@ class ProcessCommandLineInterface {
 			}
 			return output;
 		}, { validEnvironmentVariables: [] as CommandLineOptionCollection, commandLineOptions: [] as CommandLineOptionCollection } );
-
 		return {
 			validEnvironmentVariables,
 			commandLineOptions,
