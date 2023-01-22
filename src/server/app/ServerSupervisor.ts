@@ -97,7 +97,6 @@ export class ServerSupervisor {
     this.#interfaceMessaging.sendRawToInterface(responseString);
   }
 
-  // TODO: Processing Config keys should be done in ConfigManager - just the restart stuff here
   processCommandLineOptions(commandLineOptions: CommandLineOptionCollection): void {
     commandLineOptions.forEach(option => {
       const [ key, value ] = Object.entries(option)[0];
