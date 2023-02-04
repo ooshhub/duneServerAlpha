@@ -6,6 +6,7 @@ import { PathHelper } from "./app/PathHelper.js";
 import { EnvironmentKeys } from "./config/EnvironmentKeyTypes.js";
 import { ServerSupervisor } from "./app/ServerSupervisor.js";
 import { LogType } from "./utils/logger/ServerLogger.js";
+import { ConfigKeys } from "./config/ConfigKeyTypes.js";
 
 // Provide default Console as a global logger to catch any logging done before our own ServiceProviders have registered
 global.logger = console;
@@ -13,7 +14,7 @@ global.logger = console;
 dotenv.config({
   path: `./${process.env.NODE_ENV}.env`,
 });
-ConfigManager.boot();
+const commandLineOptions = ConfigManager.boot();
 
 const environment = env(EnvironmentKeys.ENVIRONMENT);
 
@@ -30,6 +31,11 @@ const serverSupervisor = new ServerSupervisor({
   playerLinkService: serviceRegistry.playerLinkProvider,
 });
 
+logger.warn(process.argv);
+// Now ServerSupervisor needs to check the CLI options for server mode
+// e.g., did the server just do a forced restart and needs to restore some state?
+serverSupervisor.processCommandLineOptions(commandLineOptions);
+
 // Start Event Dispatcher
 const eventDispatcher = new DuneEventDispatcher({
   name: 'EventDispatcher',
@@ -39,10 +45,8 @@ const eventDispatcher = new DuneEventDispatcher({
 global.dispatch = eventDispatcher.dispatchEvent;
 global.request = eventDispatcher.dispatchRequest;
 
-logger.info(env(EnvironmentKeys.ENVIRONMENT));
-// logger.info(LogType.CFI, `You're a cunt.`);
-
-logger.info(LogType.I, `Server is online. Listening on port ???`);
+logger.warn(commandLineOptions);
+logger.info(LogType.I, `Server is online. Listening on port ${config(ConfigKeys.PORT)}`);
 
 // initialise socketserver on request from stdin
 

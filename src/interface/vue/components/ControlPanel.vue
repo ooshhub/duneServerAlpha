@@ -23,7 +23,7 @@
 	};
 
 	const startServer = () => {
-		emit('startServer')
+		emit('startServer', data.port.value);
 	}
 
 	const killServer = () => {

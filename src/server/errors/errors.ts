@@ -4,6 +4,9 @@ export const ERROR = {
   MUST_OVERRIDE_METHOD: `%0 failed to override method %1`,
   NO_INSTANTIATION:	`%0 Class cannot be instantiated`,
 
+	// Env
+	BAD_ENV_SECRET: `Environment variable mismatch. Are you an imposter or an idiot?`,
+
   // Socket.io
   SERVER_NOT_ACCEPTING: `Player tried to join from %0, but server is in state %1 and not accepting players.`,
   BAD_HEADERS: `Refused connection due to bad/missing headers`,

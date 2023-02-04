@@ -1,5 +1,6 @@
 import { createServer } from "http";
 import { Server, Socket } from 'socket.io';
+import { EnvironmentKeys } from "../config/EnvironmentKeyTypes.js";
 import { DuneError } from "../errors/DuneError.js";
 import { ERROR } from "../errors/errors.js";
 import { DuneEvent, DuneServerEvent, DuneServerResponse } from "../events/DuneServerEvent.js";
@@ -382,6 +383,20 @@ export class SocketServer implements PlayerLinkContract {
 			? this.allPlayerIds
 			: message.to;
 		return await Promise.all(targetPlayerIds.map(id => this.#makeRequest(message, timeout, channel, id)));
+	}
+
+	/**
+	 * Restart requested by ServerSupervisor
+	 * Write state of game to file and exit gracefully
+	 * Send a reconnect token back to the Supervisor
+	 */
+	async requestRestart(secret: string): Promise<string | DuneError> {
+		if (env(EnvironmentKeys.RESTART_SECRET) === secret) {
+			return 'temporaryKey';
+		}
+		else {
+			throw new DuneError(ERROR.BAD_ENV_SECRET);
+		}
 	}
 
 }

@@ -15,8 +15,8 @@
  */
 
 import { CommandLineOrders } from "../config/CommandLineOrders.js";
-import { ConfigKeyTypes } from "../config/ConfigKeyTypes.js";
-import { ConfigValueTypes, EnvironmentKeyTypes, KeyTypes } from "../config/EnvironmentKeyTypes.js";
+import { ConfigKeys, ConfigKeyTypes } from "../config/ConfigKeyTypes.js";
+import { ConfigValueTypes, EnvironmentKeys, EnvironmentKeyTypes, KeyTypes } from "../config/EnvironmentKeyTypes.js";
 import { DuneError } from "../errors/DuneError.js";
 import { ERROR } from "../errors/errors.js";
 import { LogType } from "../utils/logger/ServerLogger.js";
@@ -35,7 +35,7 @@ export class ConfigManager {
 
 	constructor() { throw new DuneError(ERROR.NO_INSTANTIATION, [ this.constructor.name ]); }
 
-	static boot(): CommandLineOrderCollection {
+	static boot(): CommandLineOptionCollection {
 		if (ConfigManager.#booted) {
 			throw new DuneError(ERROR.CONFIG_ALREADY_BOOTED);
 		}
@@ -52,8 +52,8 @@ export class ConfigManager {
 		Object.assign(newConfig, envFileVariables);
 
 		// Assign command line arguments
-		const { environmentVariables,	commandLineOrders } = ProcessCommandLineInterface.processArguments(commandLineArguments);
-		Object.assign(newConfig, environmentVariables);
+		const { validEnvironmentVariables,	commandLineOptions } = ProcessCommandLineInterface.processArguments(commandLineArguments);
+		Object.assign(newConfig, ...validEnvironmentVariables);
 
 		this.#environmentConfig = newConfig;
 
@@ -66,9 +66,9 @@ export class ConfigManager {
 		global.env = ConfigManager.getEnvironmentKey;
 		global.config = ConfigManager.accessConfigKey;
 
-		// Complete the boot process and return any supervisor orderss
+		// Complete the boot process and return any supervisor orders
 		ConfigManager.#booted = true;
-		return commandLineOrders;
+		return commandLineOptions;
 
 	}
 
@@ -124,20 +124,14 @@ class ProcessEnvironmentFile {
 	}
 }
 
+export type CommandLineOptionCollection = CommandLineOption[]
 
-type CommandLineEnvironmentVariables = {
-	[key: string]: string|number|boolean|null
-}
-type CommandLineOrderCollection = {
-	[command: string]: ArgumentsCollection
-}
 type ProcessedCommandLine = {
-	environmentVariables: CommandLineEnvironmentVariables,
-	commandLineOrders: CommandLineOrderCollection
+	validEnvironmentVariables: CommandLineOptionCollection,
+	commandLineOptions: CommandLineOptionCollection
 }
-type ArgumentsCollection = {
-	[argName: string]: string
-}
+type CommandLineOption = { [key: string]: any }
+
 /**
  * Process arguments supplied in command line when launching process
  */
@@ -145,66 +139,31 @@ class ProcessCommandLineInterface {
 
 	constructor() { throw new DuneError(ERROR.NO_INSTANTIATION, [ this.constructor.name ]); }
 
-	static #environmentPrefix = /^--/;
-	static #orderPrefix = /^-([A-z])/;
+	static #commandLinePrefix = /^--/;
 
+	// Consume Environment varables and leave the rest to be dealt with as CLI options
 	static processArguments(argvArray: string[]): ProcessedCommandLine {
-		const { validEnvironmentVariables, validCommandLineOrders } = argvArray.reduce((output, arg) => {
-			if (ProcessCommandLineInterface.#environmentPrefix.test(arg)) { output.validEnvironmentVariables.push(arg) }
-			else if (ProcessCommandLineInterface.#orderPrefix.test(arg)) { output.validCommandLineOrders.push(arg) }
-			return output;
-		}, { validEnvironmentVariables: [''], validCommandLineOrders: [''] } );
-
-		const environmentVariables = validEnvironmentVariables.reduce((output, arg) => {
-			const [ key, value ] = arg.replace(ProcessCommandLineInterface.#environmentPrefix, '').split(/=/);
-			if (key in EnvironmentKeyTypes && value) {
-				const newValue = ConfigHelpers.processConfigKeyValue(EnvironmentKeyTypes[key].keyType, value);
-				return newValue === undefined
-					? output
-					: { ...output, [key]: value };
-			}
-			return output;
-		}, { } );
-
-		const commandLineOrders = validCommandLineOrders.reduce((output, arg) => {
-			const commandArgs = arg.replace(ProcessCommandLineInterface.#orderPrefix, '$1').split(/-+/g);
-			const order = commandArgs.shift()?.toLowerCase();
-			if (order && order in CommandLineOrders) {
-				const suppliedArgsObject: ArgumentsCollection = commandArgs.reduce((output, value) => {
-					const [ commandArg, argValue ] = value.split('=');
-					return commandArg && argValue
-						? { ...output, [commandArg]: argValue }
-						: output; 
-				}, {});
-				// Ensure all required args are present
-				let validOrder = true;
-				const validParameterOptions = CommandLineOrders[order].parameters;
-				const finalArgs: ArgumentsCollection = {};
-				for (let i = 0; i < validParameterOptions.length; i++) {
-					const requiredParameter = /^\?/.test(validParameterOptions[i])
-						? false
-						: true;
-					const cleanName = validParameterOptions[i].replace(/^\?/, '');
-					if (requiredParameter && !(cleanName in suppliedArgsObject)) {
-						validOrder = false;
-						break;
-					}
-					else if (cleanName in suppliedArgsObject) {
-						finalArgs[cleanName] = suppliedArgsObject[cleanName];
-					}
+		const { validEnvironmentVariables, commandLineOptions } = argvArray.reduce((output, arg) => {
+			if (ProcessCommandLineInterface.#commandLinePrefix.test(arg)) {
+				const [ key, value ] = arg.trim().replace(this.#commandLinePrefix, '').split(/=/);
+				if (value && key in EnvironmentKeys) {
+					const typedValue = ConfigHelpers.processConfigKeyValue(EnvironmentKeyTypes[key].keyType, value);
+					output.validEnvironmentVariables.push({ [key]: typedValue });
 				}
-				if (validOrder) {
-					return { ...output, [CommandLineOrders[order].command]: finalArgs };
+				else if (value && key in ConfigKeys) {
+					const typedValue = ConfigHelpers.processConfigKeyValue(ConfigKeyTypes[key].keyType, value);
+					output.commandLineOptions.push({ [key]: typedValue });
+				}
+				else {
+					output.commandLineOptions.push({ [key]: `${value}` });
 				}
 			}
 			return output;
-		}, { });
-
+		}, { validEnvironmentVariables: [] as CommandLineOptionCollection, commandLineOptions: [] as CommandLineOptionCollection } );
 		return {
-			environmentVariables,
-			commandLineOrders,
+			validEnvironmentVariables,
+			commandLineOptions,
 		}
-
 	}
 
 }
@@ -222,6 +181,9 @@ class ConfigHelpers {
 				return !/[^\d.]/.test(value)
 					? parseFloat(value)
 					: undefined
+			}
+			case(KeyTypes.NUMBER): {
+				return parseFloat(value);
 			}
 			case(KeyTypes.BOOLEAN): {
 				return /^(true|on|1)$/i.test(value)

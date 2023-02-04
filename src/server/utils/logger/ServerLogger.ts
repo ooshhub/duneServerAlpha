@@ -69,7 +69,7 @@ export class ServerLogger implements ServerLoggingContract {
 	}
 
 	#logToConsole(logLevel: LogLevel, messages: any[]): void {
-		if (this.#consoleLogger[logLevel]) this.#consoleLogger[logLevel](...messages);
+		if (this.#consoleLogger[logLevel]) this.#consoleLogger[logLevel](messages);
 	}
 
 	#logToFile(logLevel: LogLevel, messages: any[]): void {
@@ -106,9 +106,9 @@ export class ServerLogger implements ServerLoggingContract {
 		if (targets.includes('interface')) this.#logToInterface(logLevel, messages);	
 	}
 
-	log(...args: any[]): void { this.#createLog(LogLevel.LOG, args); }
-	info(...args: any[]): void { this.#createLog(LogLevel.INFO, args); }
-	warn(...args: any[]): void { this.#createLog(LogLevel.WARN, args); }
-	error(...args: any[]): void { this.#createLog(LogLevel.ERROR, args); }
+	log(...args: any[]): void { this.#createLog(LogLevel.LOG, ...args); }
+	info(...args: any[]): void { this.#createLog(LogLevel.INFO, ...args); }
+	warn(...args: any[]): void { this.#createLog(LogLevel.WARN, ...args); }
+	error(...args: any[]): void { this.#createLog(LogLevel.ERROR, ...args); }
 
 }

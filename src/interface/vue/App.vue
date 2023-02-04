@@ -3,39 +3,39 @@
 	import ServerConsole from './components/ServerConsole.vue';
 	import { ServerInterface } from '../js/ServerInterface.js';
 	import { ref } from 'vue';
-	import { StdIoEventMapping } from '../../server/events/mapping/StdIoEventMapping.js';
+	import { StdIoEvents, StdIoLogEvents, StdIoRequests, StdIoResponseMapping } from '../../server/events/mapping/StdIoEventMapping.js';
 
 	const serverObserver = (interfaceEvent) => {
 		const { eventName, eventData } = interfaceEvent;
 		switch(eventName) {
-			case(StdIoEventMapping.LOGGING.INTERFACE): {
+			case(StdIoLogEvents.INTERFACE): {
 				sendToInterfaceLog(eventData);
 				break;
 			}
-			case(StdIoEventMapping.REQUESTS.REQUEST_ECHO): {
+			case(StdIoRequests.REQUEST_ECHO): {
+				console.warn(eventData);
 				sendToInterfaceLog(eventData);
 				break;
 			}
 			case('EXIT'): {
 				data.serverOnline = false;
-				sendToInterfaceLog({ message: 'The server has closed unexpectedly.' });
+				sendToInterfaceLog({ data: 'The server has closed unexpectedly.' });
 				break;
 			}
-			case(StdIoEventMapping.UPDATES.UPDATE_ERROR): {
+			case(StdIoEvents.UPDATE_ERROR): {
 				console.error(eventData);
-				sendToInterfaceLog({ message: 'Server error logged to console.' });
+				sendToInterfaceLog({ data: 'Server error logged to console.' });
 				break;
 			}
-			case(StdIoEventMapping.REQUESTS.RESPONSE_RESTART): {
-				// TODO: handle restart complete
-				console.log('handle restart event');
+			case(StdIoResponseMapping[StdIoRequests.REQUEST_RESTART]): {
+				serverInterface.restartServer(eventData);
 				break;
 			}
-			case(StdIoEventMapping.REQUESTS.RESPONSE_STATUS || StdIoEventMapping.UPDATES.UPDATE_STATUS): {
+			case(StdIoRequests.RESPONSE_STATUS || StdIoEvents.UPDATE_STATUS): {
 				console.log('Status updated recceived');
 				break;
 			}
-			case(StdIoEventMapping.REQUESTS.RESPONSE_CLIENTS || StdIoEventMapping.UPDATES.UPDATE_CLIENTS): {
+			case(StdIoRequests.RESPONSE_CLIENTS || StdIoEvents.UPDATE_CLIENTS): {
 				console.log('Client update recieved');
 				break;
 			}
@@ -62,11 +62,10 @@
 		}).finally(() => {
 			data.serverOnline.value = serverInterface.online;
 		});
-		console.log(data.serverOnline.value);
 	}
 
 	const restartServer = async () => {
-		return false;
+		serverInterface.sendRequestToServer(StdIoRequests.REQUEST_RESTART);
 	}
 
 	const killServer = async () => {
@@ -74,7 +73,7 @@
 	}
 
 	const echoServer = async (message) => {
-		serverInterface.sendRequestToServer('REQUEST_ECHO', message);
+		serverInterface.sendRequestToServer(StdIoRequests.REQUEST_ECHO, message);
 	}
 
 	const interfaceLog = ref(null);
