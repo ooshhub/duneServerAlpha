@@ -7,7 +7,7 @@
 	const maxScrollSnapping = 150;
 
 	const receiveServerMessage = async (messageString) => {
-		console.log(`Received message:`, messageString, messageLog.value);
+		console.log(`Received message:`, messageString);
 		messageLog.value.length >= maxLogSize
 			? messageLog.value = [ ...messageLog.value.slice((messageLog.value.length - (maxLogSize - 1))), messageString ]
 			: messageLog.value.push(messageString);

@@ -1,11 +1,13 @@
 /* globals Neutralino */
 
+import { StdIoEvents, StdIoLogEvents } from "../../server/events/mapping/StdIoEventMapping.js";
 import { InterfaceEvent } from "./InterfaceEvent.js";
 import { ServerCommandInterpreter } from "./ServerCommandInterpreter.js";
 
 export class ServerInterface {
 
 	#server = {};
+  #port = '';
 	#interpreter;
 	#observer = null;
 
@@ -26,14 +28,27 @@ export class ServerInterface {
 		}
 	}
 
-	async spawnServer(port) {
+  #stringifyOptions(options = {}) {
+    let output = '';
+    if (typeof(options) === 'object') {
+      for (const key in options) {
+        output += ` --${key}=${options[key]}`;
+      }
+    }
+    return output;
+  }
+
+	async spawnServer(port, options = []) {
 		const existingProcesses = await Neutralino.os.getSpawnedProcesses();
 		if (existingProcesses.length) {
 			console.log(`Killing ${existingProcesses.length} current processes...`);
 			await this.destroyAllServers();
 			console.info(`Removed processes, server is: `, this.#server);
 		}
-		Object.assign(this.#server, await Neutralino.os.spawnProcess(`node ${this.#serverPath} --PORT=${port}`));
+    const optionString = this.#stringifyOptions(options);
+    console.warn(optionString);
+		Object.assign(this.#server, await Neutralino.os.spawnProcess(`node ${this.#serverPath} --PORT=${port} ${optionString}`));
+    this.#port = port;
 		return this.online;
 	}
 
@@ -41,8 +56,9 @@ export class ServerInterface {
 		const { data } = detail
 			? detail
 			: null;
+    if (data && typeof(data) !== 'string') console.log(`Irregular data recieved by splitLines in ServerInterface.js`, data);
 		return data
-			? data.split(/\n/g).filter(v=>v)
+      ? `${data}`.split(/\n/g).filter(v=>v)
 			: [];
 	}
 
@@ -117,9 +133,17 @@ export class ServerInterface {
 		this.sendCommandToServer('ECHO', echoString);
 	}
 
-	async restartServer() {
-		console.warn('Not yet implemented');
-		return false;
+	async restartServer({ token }) {
+		if (!token) {
+      this.sendEvent(new InterfaceEvent({
+        eventName: StdIoLogEvents.INTERFACE,
+        eventData: { data: `No restart token sent back from server restart event.` }
+      }));
+    }
+    else {
+      await this.destroyAllServers();
+      this.spawnServer(this.#port, { RESTART: token , MODE: 'restart' });
+    }
 	}
 
 }

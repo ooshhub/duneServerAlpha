@@ -8,7 +8,6 @@ export const NeutralinoManager = (() => {
     if (nlGlobals) {
       runPatch(nlGlobals);
     }
-    console.log('hello', window.NL_TOKEN);
     try {
       Neutralino.init();
       continueLoad();
@@ -24,7 +23,7 @@ export const NeutralinoManager = (() => {
     function onWindowClose() { Neutralino.app.exit(); }
     function setTray() {
         if(NL_MODE != "window") {
-            console.log("INFO: Tray menu is only available in the window mode.");
+            // console.log("INFO: Tray menu is only available in the window mode.");
             return;
         }
         let tray = {

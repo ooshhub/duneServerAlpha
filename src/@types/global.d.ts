@@ -21,7 +21,7 @@ declare global {
 		var dispatch: (domain: EventDomains, eventNameOrDuneEvent: string|DuneServerEvent, duneEvent?: DuneServerEvent) => Promise<void>;
 		var request: (domain: EventDomains, eventNameOrDuneEvent: string|DuneServerEvent, duneEvent?: DuneServerEvent) => Promise<DuneServerResponse[]>;
 		var env: (keyName: string) => ConfigValueTypes|undefined;
-		var config: (keyName: string, newValue?: string) => ConfigValueTypes|undefined;
+		var config: (keyName: string, newValue?: any) => ConfigValueTypes|undefined;
 		var path: (basePath: PathTo|string, endPath?: string) => string;
 	}
 

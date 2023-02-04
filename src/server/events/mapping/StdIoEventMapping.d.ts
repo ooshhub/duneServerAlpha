@@ -1,5 +1,4 @@
-export namespace StdIoEventMapping {
-	export const REQUESTS: GenericJson;
-	export const UPDATES: GenericJson;
-	export const LOGGING: GenericJson;
-}
+export const StdIoRequests: GenericJson;
+export const StdIoEvents: GenericJson;
+export const StdIoLogEvents: GenericJson;
+export const StdIoResponseMapping: GenericJson;

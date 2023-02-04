@@ -12,6 +12,8 @@ export type StdIoMessengerConfig = {
 export interface StdIoMessagingContract {
 
 	sendLogToInterface: (logLevel: LogLevel, messages: any[]) => Promise<void>;
+
+	sendRawToInterface: (output: string) => Promise<void>;
 	
 	addObserver(observer: GenericFunction, messageType: InterfaceMessageType): boolean
 }
