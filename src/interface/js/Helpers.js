@@ -1,7 +1,7 @@
 export class Helpers {
 
-	static async timeout(ms) {
-		return new Promise(res => setTimeout(() => res(), ms));
-	}
+  static async timeout(ms) {
+    return new Promise(res => setTimeout(() => res(), ms));
+  }
   
 }

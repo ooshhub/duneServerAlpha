@@ -11,7 +11,7 @@ import { LogType } from "./utils/logger/ServerLogger.js";
 global.logger = console;
 // Initialise dotenv, boot ConfigManager to process env and CLI options
 dotenv.config({
-	path: `./${process.env.NODE_ENV}.env`,
+  path: `./${process.env.NODE_ENV}.env`,
 });
 ConfigManager.boot();
 
@@ -19,22 +19,22 @@ const environment = env(EnvironmentKeys.ENVIRONMENT);
 
 // Start Path helper
 const basePath = environment === 'production'
-	? process.cwd()
-	: process.argv[1].replace(/[^/\\]+$/, '');
+  ? process.cwd()
+  : process.argv[1].replace(/[^/\\]+$/, '');
 PathHelper.boot(basePath);
 
 // Register core service providers and server supervisor
 const serviceRegistry = new ServiceProviderRegistry();
 const serverSupervisor = new ServerSupervisor({
-	interfaceMessagingService: serviceRegistry.stdIoMessaging,
-	playerLinkService: serviceRegistry.playerLinkProvider,
+  interfaceMessagingService: serviceRegistry.stdIoMessaging,
+  playerLinkService: serviceRegistry.playerLinkProvider,
 });
 
 // Start Event Dispatcher
 const eventDispatcher = new DuneEventDispatcher({
-	name: 'EventDispatcher',
-	playerLinkService: serviceRegistry.playerLinkProvider,
-	localHubService: serviceRegistry.localHubService
+  name: 'EventDispatcher',
+  playerLinkService: serviceRegistry.playerLinkProvider,
+  localHubService: serviceRegistry.localHubService
 });
 global.dispatch = eventDispatcher.dispatchEvent;
 global.request = eventDispatcher.dispatchRequest;
